@@ -284,7 +284,7 @@
         </h1>
 
         <div class="notice">
-            <strong>⚠️ Early prototype interface:</strong> Connect through Metamask to see your TRCKR holdings.
+            <strong>⚠️ Early prototype interface:</strong> Connect through Metamask to see your TRCR holdings.
         </div>
 
         <div id="status" class="status disconnected">
@@ -310,426 +310,427 @@
 
             <div class="info-card">
                 <h3>Your Balance</h3>
-                <div id="balance">0 TRCR</div>
+                <div id="balance">0 <div id="symbol"></div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Total Supply</h3>
+                    <div id="totalSupply">Loading...</div>
+                    <div id="symbol"></div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Your Nonce</h3>
+                    <div id="nonce">0</div>
+                </div>
             </div>
 
-            <div class="info-card">
-                <h3>Total Supply</h3>
-                <div id="totalSupply">Loading...</div>
+            <div class="actions">
+                <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
+                <button id="refreshBtn" onclick="refreshData()" disabled>Refresh Data</button>
+                <button onclick="addToMetaMask()" disabled id="addTokenBtn">Add Token to MetaMask</button>
             </div>
 
-            <div class="info-card">
-                <h3>Your Nonce</h3>
-                <div id="nonce">0</div>
+            <div class="transaction-section">
+                <h3>Transfer Tokens</h3>
+                <div class="input-group">
+                    <label for="transferTo">Recipient Address:</label>
+                    <input type="text" id="transferTo" placeholder="0x..." />
+                </div>
+                <div class="input-group">
+                    <label for="transferAmount">Amount (TRCR):</label>
+                    <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
+                </div>
+                <button onclick="transferTokens()" disabled id="transferBtn">Transfer</button>
             </div>
+
+            <div class="transaction-section">
+                <h3>Approve Allowance</h3>
+                <div class="input-group">
+                    <label for="approveSpender">Spender Address:</label>
+                    <input type="text" id="approveSpender" placeholder="0x..." />
+                </div>
+                <div class="input-group">
+                    <label for="approveAmount">Amount (TRCR):</label>
+                    <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
+                </div>
+                <button onclick="approveTokens()" disabled id="approveBtn">Approve</button>
+            </div>
+
+            <div class="transaction-section">
+                <h3>Check Allowance</h3>
+                <div class="input-group">
+                    <label for="allowanceOwner">Owner Address:</label>
+                    <input type="text" id="allowanceOwner" placeholder="0x... (leave empty for your address)" />
+                </div>
+                <div class="input-group">
+                    <label for="allowanceSpender">Spender Address:</label>
+                    <input type="text" id="allowanceSpender" placeholder="0x..." />
+                </div>
+                <button onclick="checkAllowance()" disabled id="checkAllowanceBtn">Check Allowance</button>
+                <div id="allowanceResult"></div>
+            </div>
+
+            <div id="messages"></div>
         </div>
 
-        <div class="actions">
-            <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
-            <button id="refreshBtn" onclick="refreshData()" disabled>Refresh Data</button>
-            <button onclick="addToMetaMask()" disabled id="addTokenBtn">Add Token to MetaMask</button>
-        </div>
+        <script>
+            // Contract configuration
+            const CONTRACT_ADDRESS = '0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef';
+            const ARBITRUM_SEPOLIA_CHAIN_ID = '0x66eee'; // 421614 in hex
 
-        <div class="transaction-section">
-            <h3>Transfer Tokens</h3>
-            <div class="input-group">
-                <label for="transferTo">Recipient Address:</label>
-                <input type="text" id="transferTo" placeholder="0x..." />
-            </div>
-            <div class="input-group">
-                <label for="transferAmount">Amount (TRCR):</label>
-                <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
-            </div>
-            <button onclick="transferTokens()" disabled id="transferBtn">Transfer</button>
-        </div>
+            // ERC20 ABI with ERC20Votes and ERC20Permit functions
+            const TOKEN_ABI = [
+                // Standard ERC20
+                "function name() view returns (string)",
+                "function symbol() view returns (string)",
+                "function decimals() view returns (uint8)",
+                "function totalSupply() view returns (uint256)",
+                "function balanceOf(address owner) view returns (uint256)",
+                "function allowance(address owner, address spender) view returns (uint256)",
+                "function transfer(address to, uint256 amount) returns (bool)",
+                "function approve(address spender, uint256 amount) returns (bool)",
+                "function transferFrom(address from, address to, uint256 amount) returns (bool)",
 
-        <div class="transaction-section">
-            <h3>Approve Allowance</h3>
-            <div class="input-group">
-                <label for="approveSpender">Spender Address:</label>
-                <input type="text" id="approveSpender" placeholder="0x..." />
-            </div>
-            <div class="input-group">
-                <label for="approveAmount">Amount (TRCR):</label>
-                <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
-            </div>
-            <button onclick="approveTokens()" disabled id="approveBtn">Approve</button>
-        </div>
+                // ERC20Permit
+                "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
+                "function nonces(address owner) view returns (uint256)",
+                "function DOMAIN_SEPARATOR() view returns (bytes32)",
 
-        <div class="transaction-section">
-            <h3>Check Allowance</h3>
-            <div class="input-group">
-                <label for="allowanceOwner">Owner Address:</label>
-                <input type="text" id="allowanceOwner" placeholder="0x... (leave empty for your address)" />
-            </div>
-            <div class="input-group">
-                <label for="allowanceSpender">Spender Address:</label>
-                <input type="text" id="allowanceSpender" placeholder="0x..." />
-            </div>
-            <button onclick="checkAllowance()" disabled id="checkAllowanceBtn">Check Allowance</button>
-            <div id="allowanceResult"></div>
-        </div>
+                // ERC20Votes
+                "function getVotes(address account) view returns (uint256)",
+                "function getPastVotes(address account, uint256 blockNumber) view returns (uint256)",
+                "function getPastTotalSupply(uint256 blockNumber) view returns (uint256)",
+                "function delegate(address delegatee)",
+                "function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s)",
+                "function delegates(address account) view returns (address)",
+                "function checkpoints(address account, uint32 pos) view returns (tuple(uint32 fromBlock, uint224 votes))",
+                "function numCheckpoints(address account) view returns (uint32)",
 
-        <div id="messages"></div>
-    </div>
+                // Events
+                "event Transfer(address indexed from, address indexed to, uint256 value)",
+                "event Approval(address indexed owner, address indexed spender, uint256 value)",
+                "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
+                "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)"
+            ];
 
-    <script>
-        // Contract configuration
-        const CONTRACT_ADDRESS = '0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef';
-        const ARBITRUM_SEPOLIA_CHAIN_ID = '0x66eee'; // 421614 in hex
+            let provider, signer, contract, userAccount;
 
-        // ERC20 ABI with ERC20Votes and ERC20Permit functions
-        const TOKEN_ABI = [
-            // Standard ERC20
-            "function name() view returns (string)",
-            "function symbol() view returns (string)",
-            "function decimals() view returns (uint8)",
-            "function totalSupply() view returns (uint256)",
-            "function balanceOf(address owner) view returns (uint256)",
-            "function allowance(address owner, address spender) view returns (uint256)",
-            "function transfer(address to, uint256 amount) returns (bool)",
-            "function approve(address spender, uint256 amount) returns (bool)",
-            "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+            async function connectWallet() {
+                try {
+                    if (typeof window.ethereum === 'undefined') {
+                        showMessage('MetaMask is not installed!', 'error');
+                        return;
+                    }
 
-            // ERC20Permit
-            "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
-            "function nonces(address owner) view returns (uint256)",
-            "function DOMAIN_SEPARATOR() view returns (bytes32)",
+                    // Add a small delay to ensure MetaMask is fully loaded
+                    await new Promise(resolve => setTimeout(resolve, 100));
 
-            // ERC20Votes
-            "function getVotes(address account) view returns (uint256)",
-            "function getPastVotes(address account, uint256 blockNumber) view returns (uint256)",
-            "function getPastTotalSupply(uint256 blockNumber) view returns (uint256)",
-            "function delegate(address delegatee)",
-            "function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s)",
-            "function delegates(address account) view returns (address)",
-            "function checkpoints(address account, uint32 pos) view returns (tuple(uint32 fromBlock, uint224 votes))",
-            "function numCheckpoints(address account) view returns (uint32)",
+                    // Request account access with additional options for file:// protocol
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_requestAccounts',
+                        params: []
+                    });
 
-            // Events
-            "event Transfer(address indexed from, address indexed to, uint256 value)",
-            "event Approval(address indexed owner, address indexed spender, uint256 value)",
-            "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
-            "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)"
-        ];
+                    if (!accounts || accounts.length === 0) {
+                        throw new Error('No accounts found. Please unlock MetaMask.');
+                    }
 
-        let provider, signer, contract, userAccount;
+                    // Initialize ethers provider with explicit configuration
+                    provider = new ethers.BrowserProvider(window.ethereum, {
+                        name: 'arbitrum-sepolia',
+                        chainId: 421614
+                    });
 
-        async function connectWallet() {
-            try {
-                if (typeof window.ethereum === 'undefined') {
-                    showMessage('MetaMask is not installed!', 'error');
+                    // Wait for provider to be ready
+                    await provider._detectNetwork();
+
+                    signer = await provider.getSigner();
+                    userAccount = await signer.getAddress();
+
+                    // Initialize contract
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
+
+                    // Check if we're on Arbitrum Sepolia
+                    const network = await provider.getNetwork();
+                    if (network.chainId !== 421614n) {
+                        await switchToArbitrumSepolia();
+                        // Reinitialize after network switch
+                        provider = new ethers.BrowserProvider(window.ethereum);
+                        signer = await provider.getSigner();
+                        contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
+                    }
+
+                    updateUI();
+                    await refreshData();
+
+                    showMessage('Successfully connected to MetaMask!', 'success');
+
+                } catch (error) {
+                    console.error('Connection error:', error);
+
+                    // Handle specific MetaMask errors
+                    if (error.code === 4001) {
+                        showMessage('Connection cancelled by user', 'error');
+                    } else if (error.code === -32002) {
+                        showMessage('Connection request already pending in MetaMask', 'error');
+                    } else if (error.message.includes('origin')) {
+                        showMessage('MetaMask origin error. Try refreshing the page or using a local server.', 'error');
+                    } else {
+                        showMessage(`Connection failed: ${error.message}`, 'error');
+                    }
+                }
+            }
+
+            async function switchToArbitrumSepolia() {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: ARBITRUM_SEPOLIA_CHAIN_ID }],
+                    });
+                } catch (switchError) {
+                    // This error code indicates that the chain has not been added to MetaMask
+                    if (switchError.code === 4902) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: ARBITRUM_SEPOLIA_CHAIN_ID,
+                                    chainName: 'Arbitrum Sepolia',
+                                    rpcUrls: ['https://sepolia-rollup.arbitrum.io/rpc'],
+                                    nativeCurrency: {
+                                        name: 'Arbitrum Sepolia Ether',
+                                        symbol: 'ETH',
+                                        decimals: 18
+                                    },
+                                    blockExplorerUrls: ['https://sepolia.arbiscan.io/']
+                                }]
+                            });
+                        } catch (addError) {
+                            throw new Error('Failed to add Arbitrum Sepolia network');
+                        }
+                    } else {
+                        throw new Error('Failed to switch to Arbitrum Sepolia network');
+                    }
+                }
+            }
+
+            function updateUI() {
+                if (userAccount) {
+                    document.getElementById('status').textContent = 'Connected to MetaMask';
+                    document.getElementById('status').className = 'status connected';
+                    document.getElementById('userAddress').textContent = userAccount;
+
+                    // Enable buttons
+                    const buttons = ['refreshBtn', 'transferBtn', 'approveBtn', 'checkAllowanceBtn', 'addTokenBtn'];
+                    buttons.forEach(id => document.getElementById(id).disabled = false);
+
+                    document.getElementById('connectBtn').textContent = 'Connected';
+                    document.getElementById('connectBtn').disabled = true;
+                }
+            }
+
+            async function refreshData() {
+                if (!contract || !userAccount) return;
+
+                try {
+                    // Get token info
+                    const [balance, totalSupply, nonce, name, symbol, decimals] = await Promise.all([
+                        contract.balanceOf(userAccount),
+                        contract.totalSupply(),
+                        contract.nonces(userAccount),
+                        contract.name(),
+                        contract.symbol(),
+                        contract.decimals()
+                    ]);
+
+                    // Format and display
+                    const formattedBalance = ethers.formatUnits(balance, decimals);
+                    const formattedTotalSupply = ethers.formatUnits(totalSupply, decimals);
+
+                    document.getElementById('balance').textContent = `${parseFloat(formattedBalance).toLocaleString()} ${symbol}`;
+                    document.getElementById('totalSupply').textContent = `${parseFloat(formattedTotalSupply).toLocaleString()} ${symbol}`;
+                    document.getElementById('nonce').textContent = nonce.toString();
+
+                    showMessage('Data refreshed successfully!', 'success');
+                } catch (error) {
+                    console.error('Refresh error:', error);
+                    showMessage(`Failed to refresh data: ${error.message}`, 'error');
+                }
+            }
+
+            async function transferTokens() {
+                const to = document.getElementById('transferTo').value;
+                const amount = document.getElementById('transferAmount').value;
+
+                if (!to || !amount) {
+                    showMessage('Please fill in all fields', 'error');
                     return;
                 }
 
-                // Add a small delay to ensure MetaMask is fully loaded
-                await new Promise(resolve => setTimeout(resolve, 100));
+                try {
+                    const decimals = await contract.decimals();
+                    const amountWei = ethers.parseUnits(amount, decimals);
 
-                // Request account access with additional options for file:// protocol
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                    params: []
-                });
+                    showMessage('Transaction pending... Please confirm in MetaMask', 'success');
+                    const tx = await contract.transfer(to, amountWei);
 
-                if (!accounts || accounts.length === 0) {
-                    throw new Error('No accounts found. Please unlock MetaMask.');
-                }
+                    showMessage('Transaction submitted! Waiting for confirmation...', 'success');
+                    await tx.wait();
 
-                // Initialize ethers provider with explicit configuration
-                provider = new ethers.BrowserProvider(window.ethereum, {
-                    name: 'arbitrum-sepolia',
-                    chainId: 421614
-                });
+                    showMessage(`Transfer successful! Tx: ${tx.hash}`, 'success');
+                    await refreshData();
 
-                // Wait for provider to be ready
-                await provider._detectNetwork();
+                    // Clear inputs
+                    document.getElementById('transferTo').value = '';
+                    document.getElementById('transferAmount').value = '';
 
-                signer = await provider.getSigner();
-                userAccount = await signer.getAddress();
-
-                // Initialize contract
-                contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
-
-                // Check if we're on Arbitrum Sepolia
-                const network = await provider.getNetwork();
-                if (network.chainId !== 421614n) {
-                    await switchToArbitrumSepolia();
-                    // Reinitialize after network switch
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                    contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
-                }
-
-                updateUI();
-                await refreshData();
-
-                showMessage('Successfully connected to MetaMask!', 'success');
-
-            } catch (error) {
-                console.error('Connection error:', error);
-
-                // Handle specific MetaMask errors
-                if (error.code === 4001) {
-                    showMessage('Connection cancelled by user', 'error');
-                } else if (error.code === -32002) {
-                    showMessage('Connection request already pending in MetaMask', 'error');
-                } else if (error.message.includes('origin')) {
-                    showMessage('MetaMask origin error. Try refreshing the page or using a local server.', 'error');
-                } else {
-                    showMessage(`Connection failed: ${error.message}`, 'error');
+                } catch (error) {
+                    console.error('Transfer error:', error);
+                    showMessage(`Transfer failed: ${error.message}`, 'error');
                 }
             }
-        }
 
-        async function switchToArbitrumSepolia() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: ARBITRUM_SEPOLIA_CHAIN_ID }],
-                });
-            } catch (switchError) {
-                // This error code indicates that the chain has not been added to MetaMask
-                if (switchError.code === 4902) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: ARBITRUM_SEPOLIA_CHAIN_ID,
-                                chainName: 'Arbitrum Sepolia',
-                                rpcUrls: ['https://sepolia-rollup.arbitrum.io/rpc'],
-                                nativeCurrency: {
-                                    name: 'Arbitrum Sepolia Ether',
-                                    symbol: 'ETH',
-                                    decimals: 18
-                                },
-                                blockExplorerUrls: ['https://sepolia.arbiscan.io/']
-                            }]
-                        });
-                    } catch (addError) {
-                        throw new Error('Failed to add Arbitrum Sepolia network');
-                    }
-                } else {
-                    throw new Error('Failed to switch to Arbitrum Sepolia network');
+            async function approveTokens() {
+                const spender = document.getElementById('approveSpender').value;
+                const amount = document.getElementById('approveAmount').value;
+
+                if (!spender || !amount) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+
+                try {
+                    const decimals = await contract.decimals();
+                    const amountWei = ethers.parseUnits(amount, decimals);
+
+                    showMessage('Transaction pending... Please confirm in MetaMask', 'success');
+                    const tx = await contract.approve(spender, amountWei);
+
+                    showMessage('Transaction submitted! Waiting for confirmation...', 'success');
+                    await tx.wait();
+
+                    showMessage(`Approval successful! Tx: ${tx.hash}`, 'success');
+
+                    // Clear inputs
+                    document.getElementById('approveSpender').value = '';
+                    document.getElementById('approveAmount').value = '';
+
+                } catch (error) {
+                    console.error('Approval error:', error);
+                    showMessage(`Approval failed: ${error.message}`, 'error');
                 }
             }
-        }
 
-        function updateUI() {
-            if (userAccount) {
-                document.getElementById('status').textContent = 'Connected to MetaMask';
-                document.getElementById('status').className = 'status connected';
-                document.getElementById('userAddress').textContent = userAccount;
+            async function checkAllowance() {
+                const owner = document.getElementById('allowanceOwner').value || userAccount;
+                const spender = document.getElementById('allowanceSpender').value;
 
-                // Enable buttons
-                const buttons = ['refreshBtn', 'transferBtn', 'approveBtn', 'checkAllowanceBtn', 'addTokenBtn'];
-                buttons.forEach(id => document.getElementById(id).disabled = false);
+                if (!spender) {
+                    showMessage('Please enter spender address', 'error');
+                    return;
+                }
 
-                document.getElementById('connectBtn').textContent = 'Connected';
-                document.getElementById('connectBtn').disabled = true;
-            }
-        }
+                try {
+                    const allowance = await contract.allowance(owner, spender);
+                    const decimals = await contract.decimals();
+                    const symbol = await contract.symbol();
+                    const formattedAllowance = ethers.formatUnits(allowance, decimals);
 
-        async function refreshData() {
-            if (!contract || !userAccount) return;
-
-            try {
-                // Get token info
-                const [balance, totalSupply, nonce, name, symbol, decimals] = await Promise.all([
-                    contract.balanceOf(userAccount),
-                    contract.totalSupply(),
-                    contract.nonces(userAccount),
-                    contract.name(),
-                    contract.symbol(),
-                    contract.decimals()
-                ]);
-
-                // Format and display
-                const formattedBalance = ethers.formatUnits(balance, decimals);
-                const formattedTotalSupply = ethers.formatUnits(totalSupply, decimals);
-
-                document.getElementById('balance').textContent = `${parseFloat(formattedBalance).toLocaleString()} ${symbol}`;
-                document.getElementById('totalSupply').textContent = `${parseFloat(formattedTotalSupply).toLocaleString()} ${symbol}`;
-                document.getElementById('nonce').textContent = nonce.toString();
-
-                showMessage('Data refreshed successfully!', 'success');
-            } catch (error) {
-                console.error('Refresh error:', error);
-                showMessage(`Failed to refresh data: ${error.message}`, 'error');
-            }
-        }
-
-        async function transferTokens() {
-            const to = document.getElementById('transferTo').value;
-            const amount = document.getElementById('transferAmount').value;
-
-            if (!to || !amount) {
-                showMessage('Please fill in all fields', 'error');
-                return;
-            }
-
-            try {
-                const decimals = await contract.decimals();
-                const amountWei = ethers.parseUnits(amount, decimals);
-
-                showMessage('Transaction pending... Please confirm in MetaMask', 'success');
-                const tx = await contract.transfer(to, amountWei);
-
-                showMessage('Transaction submitted! Waiting for confirmation...', 'success');
-                await tx.wait();
-
-                showMessage(`Transfer successful! Tx: ${tx.hash}`, 'success');
-                await refreshData();
-
-                // Clear inputs
-                document.getElementById('transferTo').value = '';
-                document.getElementById('transferAmount').value = '';
-
-            } catch (error) {
-                console.error('Transfer error:', error);
-                showMessage(`Transfer failed: ${error.message}`, 'error');
-            }
-        }
-
-        async function approveTokens() {
-            const spender = document.getElementById('approveSpender').value;
-            const amount = document.getElementById('approveAmount').value;
-
-            if (!spender || !amount) {
-                showMessage('Please fill in all fields', 'error');
-                return;
-            }
-
-            try {
-                const decimals = await contract.decimals();
-                const amountWei = ethers.parseUnits(amount, decimals);
-
-                showMessage('Transaction pending... Please confirm in MetaMask', 'success');
-                const tx = await contract.approve(spender, amountWei);
-
-                showMessage('Transaction submitted! Waiting for confirmation...', 'success');
-                await tx.wait();
-
-                showMessage(`Approval successful! Tx: ${tx.hash}`, 'success');
-
-                // Clear inputs
-                document.getElementById('approveSpender').value = '';
-                document.getElementById('approveAmount').value = '';
-
-            } catch (error) {
-                console.error('Approval error:', error);
-                showMessage(`Approval failed: ${error.message}`, 'error');
-            }
-        }
-
-        async function checkAllowance() {
-            const owner = document.getElementById('allowanceOwner').value || userAccount;
-            const spender = document.getElementById('allowanceSpender').value;
-
-            if (!spender) {
-                showMessage('Please enter spender address', 'error');
-                return;
-            }
-
-            try {
-                const allowance = await contract.allowance(owner, spender);
-                const decimals = await contract.decimals();
-                const symbol = await contract.symbol();
-                const formattedAllowance = ethers.formatUnits(allowance, decimals);
-
-                document.getElementById('allowanceResult').innerHTML = `
+                    document.getElementById('allowanceResult').innerHTML = `
                     <div class="success">
                         Allowance: ${parseFloat(formattedAllowance).toLocaleString()} ${symbol}
                     </div>
                 `;
-            } catch (error) {
-                console.error('Allowance check error:', error);
-                showMessage(`Failed to check allowance: ${error.message}`, 'error');
-            }
-        }
-
-        async function addToMetaMask() {
-            try {
-                const [symbol, decimals] = await Promise.all([
-                    contract.symbol(),
-                    contract.decimals()
-                ]);
-
-                await window.ethereum.request({
-                    method: 'wallet_watchAsset',
-                    params: {
-                        type: 'ERC20',
-                        options: {
-                            address: CONTRACT_ADDRESS,
-                            symbol: symbol,
-                            decimals: decimals,
-                        },
-                    },
-                });
-
-                showMessage('Token added to MetaMask!', 'success');
-            } catch (error) {
-                console.error('Add token error:', error);
-                showMessage(`Failed to add token: ${error.message}`, 'error');
-            }
-        }
-
-        function showMessage(message, type) {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type;
-            messageDiv.textContent = message;
-            messagesDiv.appendChild(messageDiv);
-
-            // Remove message after 5 seconds
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.parentNode.removeChild(messageDiv);
-                }
-            }, 5000);
-        }
-
-        // Listen for account changes with error handling
-        if (typeof window.ethereum !== 'undefined') {
-            // Wrap event listeners in try-catch to handle origin errors
-            try {
-                window.ethereum.on('accountsChanged', function (accounts) {
-                    if (accounts.length === 0) {
-                        location.reload();
-                    } else {
-                        setTimeout(() => connectWallet(), 100);
-                    }
-                });
-
-                window.ethereum.on('chainChanged', function (chainId) {
-                    setTimeout(() => location.reload(), 100);
-                });
-            } catch (error) {
-                console.warn('Event listener setup failed:', error);
-            }
-        }
-
-        // Auto-connect if previously connected
-        window.addEventListener('load', async function () {
-            // Add delay to ensure page is fully loaded
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    // Check if MetaMask is unlocked and has connected accounts
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        // Add another small delay before connecting
-                        setTimeout(() => connectWallet(), 200);
-                    }
                 } catch (error) {
-                    console.warn('Auto-connect check failed:', error);
-                    // Don't show error message for auto-connect failures
+                    console.error('Allowance check error:', error);
+                    showMessage(`Failed to check allowance: ${error.message}`, 'error');
                 }
-            } else {
-                console.warn('MetaMask not detected on page load');
             }
-        });
-    </script>
+
+            async function addToMetaMask() {
+                try {
+                    const [symbol, decimals] = await Promise.all([
+                        contract.symbol(),
+                        contract.decimals()
+                    ]);
+
+                    await window.ethereum.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: 'ERC20',
+                            options: {
+                                address: CONTRACT_ADDRESS,
+                                symbol: symbol,
+                                decimals: decimals,
+                            },
+                        },
+                    });
+
+                    showMessage('Token added to MetaMask!', 'success');
+                } catch (error) {
+                    console.error('Add token error:', error);
+                    showMessage(`Failed to add token: ${error.message}`, 'error');
+                }
+            }
+
+            function showMessage(message, type) {
+                const messagesDiv = document.getElementById('messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = type;
+                messageDiv.textContent = message;
+                messagesDiv.appendChild(messageDiv);
+
+                // Remove message after 5 seconds
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 5000);
+            }
+
+            // Listen for account changes with error handling
+            if (typeof window.ethereum !== 'undefined') {
+                // Wrap event listeners in try-catch to handle origin errors
+                try {
+                    window.ethereum.on('accountsChanged', function (accounts) {
+                        if (accounts.length === 0) {
+                            location.reload();
+                        } else {
+                            setTimeout(() => connectWallet(), 100);
+                        }
+                    });
+
+                    window.ethereum.on('chainChanged', function (chainId) {
+                        setTimeout(() => location.reload(), 100);
+                    });
+                } catch (error) {
+                    console.warn('Event listener setup failed:', error);
+                }
+            }
+
+            // Auto-connect if previously connected
+            window.addEventListener('load', async function () {
+                // Add delay to ensure page is fully loaded
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        // Check if MetaMask is unlocked and has connected accounts
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            // Add another small delay before connecting
+                            setTimeout(() => connectWallet(), 200);
+                        }
+                    } catch (error) {
+                        console.warn('Auto-connect check failed:', error);
+                        // Don't show error message for auto-connect failures
+                    }
+                } else {
+                    console.warn('MetaMask not detected on page load');
+                }
+            });
+        </script>
 </body>
 
 </html>
