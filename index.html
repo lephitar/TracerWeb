@@ -324,6 +324,12 @@
                 <h3>Your Nonce</h3>
                 <div id="nonce"></div>
             </div>
+
+            <div class="info-card">
+                <h3>Your Voting power</h3>
+                <div id="votingPower">Loading...</div>
+                <div id="symbol"></div>
+            </div>
         </div>
 
         <div class="actions">
@@ -558,22 +564,25 @@
 
             try {
                 // Get token info
-                const [balance, totalSupply, nonce, name, symbol, decimals] = await Promise.all([
+                const [balance, totalSupply, nonce, name, symbol, decimals, votingPower] = await Promise.all([
                     contract.balanceOf(userAccount),
                     contract.totalSupply(),
                     contract.nonces(userAccount),
                     contract.name(),
                     contract.symbol(),
-                    contract.decimals()
+                    contract.decimals(),
+                    contract.getVotes(userAccount)
                 ]);
 
                 // Format and display
                 const formattedBalance = ethers.formatUnits(balance, decimals);
                 const formattedTotalSupply = ethers.formatUnits(totalSupply, decimals);
+                const formattedVotingPower = ethers.formatUnits(votingPower, decimals);
 
                 document.getElementById('balance').textContent = `${parseFloat(formattedBalance).toLocaleString()} ${symbol}`;
                 document.getElementById('totalSupply').textContent = `${parseFloat(formattedTotalSupply).toLocaleString()} ${symbol}`;
                 document.getElementById('nonce').textContent = nonce.toString();
+                document.getElementById('votingPower').textContent = `${parseFloat(formattedVotingPower).toLocaleString()} ${symbol}`;
 
                 showMessage('Data refreshed successfully!', 'success');
             } catch (error) {
