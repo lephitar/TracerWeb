@@ -398,6 +398,25 @@
             <div id="delegateResult"></div>
         </div>
 
+        <div class="transaction-section">
+            <h3>Sign and Submit Permit</h3>
+            <div class="input-group">
+                <label for="permitSpenderAddress">Permit Spender:</label>
+                <input type="text" id="permitSpenderAddress" placeholder="0x..." type="text" />
+            </div>
+            <div class="input-group">
+                <label for="permitAmount">Amount: (TRCR)</label>
+                <input type="text" id="permitAmount" placeholder="0.0" type="text" />
+            </div>
+            <div class="input-group">
+                <label for="deadlineStr">Deadline (local time):</label>
+                <input type="text" id="deadlineStr" type="datetime-local" />
+            </div>
+
+            <button onclick="signAndSubmitPermit()" disabled id="signAndSubmitBtn">Sign & Sumbit</button>
+            <div id="signAndSubmitResult"></div>
+        </div>
+
         <div id="messages"></div>
     </div>
 
@@ -489,6 +508,9 @@
                 }
                 document.getElementById('checkVotingPowerBtn').disabled = false;
                 document.getElementById('delegateBtn').disabled = false;
+                document.getElementById('signAndSubmitBtn').disabled = false;
+
+                document.getElementById('deadlineStr').value = defaultPermitDeadline();
 
                 updateUI();
                 await refreshData();
@@ -742,6 +764,125 @@
         }
 
 
+        async function signAndSubmitPermit() {
+            const spender = document.getElementById('permitSpenderAddress').value.trim();
+            const amountStr = document.getElementById('permitAmount').value.trim();
+            const deadlineStr = document.getElementById('deadlineStr').value.trim(); // <input type="datetime-local">
+
+            // Basic validations
+            if (!ethers.isAddress(spender)) {
+                showMessage('Invalid permit spender address', 'error');
+                return;
+            }
+            if (!amountStr || isNaN(Number(amountStr)) || Number(amountStr) <= 0) {
+                showMessage('Enter a valid amount', 'error');
+                return;
+            }
+            if (!deadlineStr) {
+                showMessage('Please choose a deadline (date & time)', 'error');
+                return;
+            }
+
+            try {
+                // Disable button + info
+                const btn = document.getElementById('signAndSubmitBtn');
+                btn.disabled = true;
+                showMessage('Signing permit and sending transaction…', 'info');
+
+                // Gather data
+                const [decimals, name, tokenAddress, nonce, network] = await Promise.all([
+                    contract.decimals(),
+                    contract.name(),
+                    contract.getAddress(),
+                    contract.nonces(userAccount),
+                    provider.getNetwork()
+                ]);
+
+                const value = ethers.parseUnits(amountStr, decimals);
+
+                // Convert local datetime to UNIX seconds
+                const deadlineMs = new Date(deadlineStr).getTime();
+                if (Number.isNaN(deadlineMs)) {
+                    showMessage('Invalid deadline format', 'error');
+                    btn.disabled = false;
+                    return;
+                }
+                const deadline = Math.floor(deadlineMs / 1000);
+                const nowSec = Math.floor(Date.now() / 1000);
+                if (deadline <= nowSec) {
+                    showMessage('Deadline must be in the future', 'error');
+                    btn.disabled = false;
+                    return;
+                }
+
+                // EIP-712 domain/types/message
+                const domain = {
+                    name,
+                    version: '1', // OpenZeppelin ERC20Permit default
+                    chainId: Number(network.chainId),
+                    verifyingContract: tokenAddress
+                };
+
+                const types = {
+                    Permit: [
+                        { name: 'owner', type: 'address' },
+                        { name: 'spender', type: 'address' },
+                        { name: 'value', type: 'uint256' },
+                        { name: 'nonce', type: 'uint256' },
+                        { name: 'deadline', type: 'uint256' }
+                    ]
+                };
+
+                const message = {
+                    owner: userAccount,
+                    spender,
+                    value,
+                    nonce,
+                    deadline
+                };
+
+                // Ask wallet to sign typed data (EIP-712)
+                const signature = await signer.signTypedData(domain, types, message);
+                const { v, r, s } = ethers.Signature.from(signature);
+
+                // Submit permit on-chain
+                const tx = await contract.permit(userAccount, spender, value, deadline, v, r, s);
+                await tx.wait();
+
+                // Optional: build an explorer link (main chains only)
+                const chainId = Number(network.chainId);
+                const explorerByChain = {
+                    1: 'https://etherscan.io/tx/',
+                    5: 'https://goerli.etherscan.io/tx/',
+                    11155111: 'https://sepolia.etherscan.io/tx/',
+                    137: 'https://polygonscan.com/tx/',
+                    10: 'https://optimistic.etherscan.io/tx/',
+                    8453: 'https://basescan.org/tx/',
+                    42161: 'https://arbiscan.io/tx/',
+                    ARBITRUM_SEPOLIA_CHAIN_ID: 'https://sepolia.arbiscan.io/'
+                };
+                const explorer = explorerByChain[chainId];
+
+                document.getElementById('signAndSubmitResult').innerHTML = `
+            <div class="success">
+                Permit submitted successfully for <code>${spender}</code><br/>
+                ${explorer
+                        ? `TX Hash: <a href="${explorer}${tx.hash}" target="_blank" rel="noopener">${tx.hash}</a>`
+                        : `TX Hash: ${tx.hash}`
+                    }
+            </div>
+        `;
+                showMessage('Permit successful! Allowance has been set via signature.', 'success');
+            } catch (error) {
+                console.error('Permit error:', error);
+                showMessage(`Permit failed: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('signAndSubmitBtn').disabled = false;
+            }
+        }
+
+
+
         async function addToMetaMask() {
             try {
                 const [symbol, decimals] = await Promise.all([
@@ -782,6 +923,25 @@
                 }
             }, 5000);
         }
+
+        // Utility
+        const nowPlusMins = (m) => new Date(Date.now() + m * 60 * 1000);
+        const toUnix = (d) => Math.floor(d.getTime() / 1000);
+
+
+        function defaultPermitDeadline() {
+            // +60 minutes by default
+            const dt = nowPlusMins(60);
+            // to local datetime-local formatted string
+            const pad = (n) => String(n).padStart(2, '0');
+            const yyyy = dt.getFullYear();
+            const mm = pad(dt.getMonth() + 1);
+            const dd = pad(dt.getDate());
+            const hh = pad(dt.getHours());
+            const mi = pad(dt.getMinutes());
+            return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+        }
+
 
         // Listen for account changes with error handling
         if (typeof window.ethereum !== 'undefined') {
