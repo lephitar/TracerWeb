@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracer Token Interface</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&family=Open+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #2c59fb;
+            --bg-light: #f5f7ff;
+            --bg-medium: #e8edff;
+            --bg-dark: #dde5ff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-light: #718096;
+            --card-bg: #ffffff;
+            --shadow: rgba(44, 89, 251, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 400;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-medium) 50%, var(--bg-dark) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-family: 'Comfortaa', cursive;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        h3 {
+            font-family: 'Comfortaa', cursive;
+            font-weight: 600;
+            margin-top: 0;
+            color: var(--primary-blue);
+        }
+
+        .status {
+            padding: 16px 24px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-align: center;
+            font-family: 'Comfortaa', cursive;
+        }
+
+        .status.connected {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .status.disconnected {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px var(--shadow);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        button {
+            font-family: 'Comfortaa', cursive;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-blue), #1e40af);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(44, 89, 251, 0.3);
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(44, 89, 251, 0.4);
+            background: linear-gradient(135deg, #1e40af, var(--primary-blue));
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: linear-gradient(135deg, var(--text-light), #9ca3af);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 8px rgba(113, 128, 150, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 24px;
+            border: 2px solid var(--bg-medium);
+            border-radius: 50px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: 'Open Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(44, 89, 251, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-light);
+        }
+
+        .transaction-section {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px var(--shadow);
+        }
+
+        .transaction-section h3 {
+            margin-top: 0;
+            color: var(--primary-blue);
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--bg-medium);
+            margin-bottom: 24px;
+        }
+
+        .contract-info {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: var(--bg-light);
+            color: var(--text-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            word-break: break-all;
+            border: 1px solid var(--bg-medium);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 2px solid #f87171;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #34d399;
+            color: #065f46;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .notice {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .notice code {
+            background: rgba(146, 64, 14, 0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 2em;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>
+            <img src="tracerlogo.png" alt="Tracer Logo" class="logo">
+            Tracer Token Interface
+        </h1>
+
+        <div class="notice">
+            <strong>⚠️ File Protocol Notice:</strong> If you encounter connection issues, try serving this file through
+            a local server (e.g., <code>python -m http.server 8000</code>) instead of opening directly as a file.
+        </div>
+
+        <div id="status" class="status disconnected">
+            Not Connected to MetaMask
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Network</h3>
+                <div id="network">Arbitrum Sepolia</div>
+                <div class="contract-info">Chain ID: 421614</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Contract Address</h3>
+                <div class="contract-info" id="contractAddress">0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Your Address</h3>
+                <div class="contract-info" id="userAddress">Not Connected</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Your Balance</h3>
+                <div id="balance">0 TRCR</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Total Supply</h3>
+                <div id="totalSupply">Loading...</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Your Nonce</h3>
+                <div id="nonce">0</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
+            <button id="refreshBtn" onclick="refreshData()" disabled>Refresh Data</button>
+            <button onclick="addToMetaMask()" disabled id="addTokenBtn">Add Token to MetaMask</button>
+        </div>
+
+        <div class="transaction-section">
+            <h3>Transfer Tokens</h3>
+            <div class="input-group">
+                <label for="transferTo">Recipient Address:</label>
+                <input type="text" id="transferTo" placeholder="0x..." />
+            </div>
+            <div class="input-group">
+                <label for="transferAmount">Amount (TRCR):</label>
+                <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
+            </div>
+            <button onclick="transferTokens()" disabled id="transferBtn">Transfer</button>
+        </div>
+
+        <div class="transaction-section">
+            <h3>Approve Allowance</h3>
+            <div class="input-group">
+                <label for="approveSpender">Spender Address:</label>
+                <input type="text" id="approveSpender" placeholder="0x..." />
+            </div>
+            <div class="input-group">
+                <label for="approveAmount">Amount (TRCR):</label>
+                <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
+            </div>
+            <button onclick="approveTokens()" disabled id="approveBtn">Approve</button>
+        </div>
+
+        <div class="transaction-section">
+            <h3>Check Allowance</h3>
+            <div class="input-group">
+                <label for="allowanceOwner">Owner Address:</label>
+                <input type="text" id="allowanceOwner" placeholder="0x... (leave empty for your address)" />
+            </div>
+            <div class="input-group">
+                <label for="allowanceSpender">Spender Address:</label>
+                <input type="text" id="allowanceSpender" placeholder="0x..." />
+            </div>
+            <button onclick="checkAllowance()" disabled id="checkAllowanceBtn">Check Allowance</button>
+            <div id="allowanceResult"></div>
+        </div>
+
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        // Contract configuration
+        const CONTRACT_ADDRESS = '0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef';
+        const ARBITRUM_SEPOLIA_CHAIN_ID = '0x66eee'; // 421614 in hex
+
+        // ERC20 ABI with ERC20Votes and ERC20Permit functions
+        const TOKEN_ABI = [
+            // Standard ERC20
+            "function name() view returns (string)",
+            "function symbol() view returns (string)",
+            "function decimals() view returns (uint8)",
+            "function totalSupply() view returns (uint256)",
+            "function balanceOf(address owner) view returns (uint256)",
+            "function allowance(address owner, address spender) view returns (uint256)",
+            "function transfer(address to, uint256 amount) returns (bool)",
+            "function approve(address spender, uint256 amount) returns (bool)",
+            "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+
+            // ERC20Permit
+            "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
+            "function nonces(address owner) view returns (uint256)",
+            "function DOMAIN_SEPARATOR() view returns (bytes32)",
+
+            // ERC20Votes
+            "function getVotes(address account) view returns (uint256)",
+            "function getPastVotes(address account, uint256 blockNumber) view returns (uint256)",
+            "function getPastTotalSupply(uint256 blockNumber) view returns (uint256)",
+            "function delegate(address delegatee)",
+            "function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s)",
+            "function delegates(address account) view returns (address)",
+            "function checkpoints(address account, uint32 pos) view returns (tuple(uint32 fromBlock, uint224 votes))",
+            "function numCheckpoints(address account) view returns (uint32)",
+
+            // Events
+            "event Transfer(address indexed from, address indexed to, uint256 value)",
+            "event Approval(address indexed owner, address indexed spender, uint256 value)",
+            "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
+            "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)"
+        ];
+
+        let provider, signer, contract, userAccount;
+
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    showMessage('MetaMask is not installed!', 'error');
+                    return;
+                }
+
+                // Add a small delay to ensure MetaMask is fully loaded
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Request account access with additional options for file:// protocol
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                    params: []
+                });
+
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No accounts found. Please unlock MetaMask.');
+                }
+
+                // Initialize ethers provider with explicit configuration
+                provider = new ethers.BrowserProvider(window.ethereum, {
+                    name: 'arbitrum-sepolia',
+                    chainId: 421614
+                });
+
+                // Wait for provider to be ready
+                await provider._detectNetwork();
+
+                signer = await provider.getSigner();
+                userAccount = await signer.getAddress();
+
+                // Initialize contract
+                contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
+
+                // Check if we're on Arbitrum Sepolia
+                const network = await provider.getNetwork();
+                if (network.chainId !== 421614n) {
+                    await switchToArbitrumSepolia();
+                    // Reinitialize after network switch
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
+                }
+
+                updateUI();
+                await refreshData();
+
+                showMessage('Successfully connected to MetaMask!', 'success');
+
+            } catch (error) {
+                console.error('Connection error:', error);
+
+                // Handle specific MetaMask errors
+                if (error.code === 4001) {
+                    showMessage('Connection cancelled by user', 'error');
+                } else if (error.code === -32002) {
+                    showMessage('Connection request already pending in MetaMask', 'error');
+                } else if (error.message.includes('origin')) {
+                    showMessage('MetaMask origin error. Try refreshing the page or using a local server.', 'error');
+                } else {
+                    showMessage(`Connection failed: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function switchToArbitrumSepolia() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: ARBITRUM_SEPOLIA_CHAIN_ID }],
+                });
+            } catch (switchError) {
+                // This error code indicates that the chain has not been added to MetaMask
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: ARBITRUM_SEPOLIA_CHAIN_ID,
+                                chainName: 'Arbitrum Sepolia',
+                                rpcUrls: ['https://sepolia-rollup.arbitrum.io/rpc'],
+                                nativeCurrency: {
+                                    name: 'Arbitrum Sepolia Ether',
+                                    symbol: 'ETH',
+                                    decimals: 18
+                                },
+                                blockExplorerUrls: ['https://sepolia.arbiscan.io/']
+                            }]
+                        });
+                    } catch (addError) {
+                        throw new Error('Failed to add Arbitrum Sepolia network');
+                    }
+                } else {
+                    throw new Error('Failed to switch to Arbitrum Sepolia network');
+                }
+            }
+        }
+
+        function updateUI() {
+            if (userAccount) {
+                document.getElementById('status').textContent = 'Connected to MetaMask';
+                document.getElementById('status').className = 'status connected';
+                document.getElementById('userAddress').textContent = userAccount;
+
+                // Enable buttons
+                const buttons = ['refreshBtn', 'transferBtn', 'approveBtn', 'checkAllowanceBtn', 'addTokenBtn'];
+                buttons.forEach(id => document.getElementById(id).disabled = false);
+
+                document.getElementById('connectBtn').textContent = 'Connected';
+                document.getElementById('connectBtn').disabled = true;
+            }
+        }
+
+        async function refreshData() {
+            if (!contract || !userAccount) return;
+
+            try {
+                // Get token info
+                const [balance, totalSupply, nonce, name, symbol, decimals] = await Promise.all([
+                    contract.balanceOf(userAccount),
+                    contract.totalSupply(),
+                    contract.nonces(userAccount),
+                    contract.name(),
+                    contract.symbol(),
+                    contract.decimals()
+                ]);
+
+                // Format and display
+                const formattedBalance = ethers.formatUnits(balance, decimals);
+                const formattedTotalSupply = ethers.formatUnits(totalSupply, decimals);
+
+                document.getElementById('balance').textContent = `${parseFloat(formattedBalance).toLocaleString()} ${symbol}`;
+                document.getElementById('totalSupply').textContent = `${parseFloat(formattedTotalSupply).toLocaleString()} ${symbol}`;
+                document.getElementById('nonce').textContent = nonce.toString();
+
+                showMessage('Data refreshed successfully!', 'success');
+            } catch (error) {
+                console.error('Refresh error:', error);
+                showMessage(`Failed to refresh data: ${error.message}`, 'error');
+            }
+        }
+
+        async function transferTokens() {
+            const to = document.getElementById('transferTo').value;
+            const amount = document.getElementById('transferAmount').value;
+
+            if (!to || !amount) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                const decimals = await contract.decimals();
+                const amountWei = ethers.parseUnits(amount, decimals);
+
+                showMessage('Transaction pending... Please confirm in MetaMask', 'success');
+                const tx = await contract.transfer(to, amountWei);
+
+                showMessage('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+
+                showMessage(`Transfer successful! Tx: ${tx.hash}`, 'success');
+                await refreshData();
+
+                // Clear inputs
+                document.getElementById('transferTo').value = '';
+                document.getElementById('transferAmount').value = '';
+
+            } catch (error) {
+                console.error('Transfer error:', error);
+                showMessage(`Transfer failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function approveTokens() {
+            const spender = document.getElementById('approveSpender').value;
+            const amount = document.getElementById('approveAmount').value;
+
+            if (!spender || !amount) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                const decimals = await contract.decimals();
+                const amountWei = ethers.parseUnits(amount, decimals);
+
+                showMessage('Transaction pending... Please confirm in MetaMask', 'success');
+                const tx = await contract.approve(spender, amountWei);
+
+                showMessage('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+
+                showMessage(`Approval successful! Tx: ${tx.hash}`, 'success');
+
+                // Clear inputs
+                document.getElementById('approveSpender').value = '';
+                document.getElementById('approveAmount').value = '';
+
+            } catch (error) {
+                console.error('Approval error:', error);
+                showMessage(`Approval failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAllowance() {
+            const owner = document.getElementById('allowanceOwner').value || userAccount;
+            const spender = document.getElementById('allowanceSpender').value;
+
+            if (!spender) {
+                showMessage('Please enter spender address', 'error');
+                return;
+            }
+
+            try {
+                const allowance = await contract.allowance(owner, spender);
+                const decimals = await contract.decimals();
+                const symbol = await contract.symbol();
+                const formattedAllowance = ethers.formatUnits(allowance, decimals);
+
+                document.getElementById('allowanceResult').innerHTML = `
+                    <div class="success">
+                        Allowance: ${parseFloat(formattedAllowance).toLocaleString()} ${symbol}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Allowance check error:', error);
+                showMessage(`Failed to check allowance: ${error.message}`, 'error');
+            }
+        }
+
+        async function addToMetaMask() {
+            try {
+                const [symbol, decimals] = await Promise.all([
+                    contract.symbol(),
+                    contract.decimals()
+                ]);
+
+                await window.ethereum.request({
+                    method: 'wallet_watchAsset',
+                    params: {
+                        type: 'ERC20',
+                        options: {
+                            address: CONTRACT_ADDRESS,
+                            symbol: symbol,
+                            decimals: decimals,
+                        },
+                    },
+                });
+
+                showMessage('Token added to MetaMask!', 'success');
+            } catch (error) {
+                console.error('Add token error:', error);
+                showMessage(`Failed to add token: ${error.message}`, 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        // Listen for account changes with error handling
+        if (typeof window.ethereum !== 'undefined') {
+            // Wrap event listeners in try-catch to handle origin errors
+            try {
+                window.ethereum.on('accountsChanged', function (accounts) {
+                    if (accounts.length === 0) {
+                        location.reload();
+                    } else {
+                        setTimeout(() => connectWallet(), 100);
+                    }
+                });
+
+                window.ethereum.on('chainChanged', function (chainId) {
+                    setTimeout(() => location.reload(), 100);
+                });
+            } catch (error) {
+                console.warn('Event listener setup failed:', error);
+            }
+        }
+
+        // Auto-connect if previously connected
+        window.addEventListener('load', async function () {
+            // Add delay to ensure page is fully loaded
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Check if MetaMask is unlocked and has connected accounts
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        // Add another small delay before connecting
+                        setTimeout(() => connectWallet(), 200);
+                    }
+                } catch (error) {
+                    console.warn('Auto-connect check failed:', error);
+                    // Don't show error message for auto-connect failures
+                }
+            } else {
+                console.warn('MetaMask not detected on page load');
+            }
+        });
+    </script>
+</body>
+
+</html>
