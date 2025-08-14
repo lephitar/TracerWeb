@@ -386,6 +386,25 @@
         </div>
 
         <div class="transaction-section">
+            <h3>Permit via Signature</h3>
+            <div class="input-group">
+                <label for="permitSpenderAddress">Permit Spender:</label>
+                <input type="text" id="permitSpenderAddress" placeholder="0x..." type="text" />
+            </div>
+            <div class="input-group">
+                <label for="permitAmount">Amount: (TRCR)</label>
+                <input type="text" id="permitAmount" placeholder="0.0" type="text" />
+            </div>
+            <div class="input-group">
+                <label for="deadlineStr">Deadline (local time):</label>
+                <input type="text" id="deadlineStr" type="datetime-local" />
+            </div>
+
+            <button onclick="signAndSubmitPermit()" disabled id="signAndSubmitBtn">Sign & Sumbit</button>
+            <div id="signAndSubmitResult"></div>
+        </div>
+
+        <div class="transaction-section">
             <h3>Check Voting Power</h3>
             <div class="input-group">
                 <label for="votingPowerAddress">Address:</label>
@@ -403,25 +422,6 @@
             </div>
             <button onclick="delegateVotingPower()" disabled id="delegateBtn">Delegate</button>
             <div id="delegateResult"></div>
-        </div>
-
-        <div class="transaction-section">
-            <h3>Permit via Signature</h3>
-            <div class="input-group">
-                <label for="permitSpenderAddress">Permit Spender:</label>
-                <input type="text" id="permitSpenderAddress" placeholder="0x..." type="text" />
-            </div>
-            <div class="input-group">
-                <label for="permitAmount">Amount: (TRCR)</label>
-                <input type="text" id="permitAmount" placeholder="0.0" type="text" />
-            </div>
-            <div class="input-group">
-                <label for="deadlineStr">Deadline (local time):</label>
-                <input type="text" id="deadlineStr" type="datetime-local" />
-            </div>
-
-            <button onclick="signAndSubmitPermit()" disabled id="signAndSubmitBtn">Sign & Sumbit</button>
-            <div id="signAndSubmitResult"></div>
         </div>
 
         <div id="messages"></div>
