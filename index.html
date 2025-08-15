@@ -373,9 +373,8 @@
                 <label for="transferAmount">Amount (TRCR):</label>
                 <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
             </div>
-            <button onclick="transferTokens()" disabled id="transferBtn">Transfer</button>
-            <div id="transferResult"></div>
-
+            <button onclick="transferTokens()" disabled id="transferTokensBtn">Transfer</button>
+            <div id="transferTokensResult"></div>
         </div>
 
         <div class="transaction-section">
@@ -388,7 +387,8 @@
                 <label for="approveAmount">Amount (TRCR):</label>
                 <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
             </div>
-            <button onclick="approveTokens()" disabled id="approveBtn">Approve</button>
+            <button onclick="approveTokens()" disabled id="approveTokensBtn">Approve</button>
+            <div id="approveTokensResult"></div>
         </div>
 
         <div class="transaction-section">
@@ -402,7 +402,7 @@
                 <input type="text" id="allowanceSpender" placeholder="0x..." />
             </div>
             <button onclick="checkAllowance()" disabled id="checkAllowanceBtn">Check Allowance</button>
-            <div id="allowanceResult"></div>
+            <div id="checkAllowanceResult"></div>
         </div>
 
         <div class="transaction-section">
@@ -420,8 +420,8 @@
                 <input type="text" id="deadlineStr" type="datetime-local" />
             </div>
 
-            <button onclick="signAndSubmitPermit()" disabled id="signAndSubmitBtn">Sign & Sumbit</button>
-            <div id="signAndSubmitResult"></div>
+            <button onclick="signAndSubmitPermit()" disabled id="signAndSubmitPermitBtn">Sign & Sumbit</button>
+            <div id="signAndSubmitPermitResult"></div>
         </div>
 
         <div class="transaction-section">
@@ -431,7 +431,7 @@
                 <input type="text" id="votingPowerAddress" placeholder="0x... (leave empty for your address)" />
             </div>
             <button onclick="checkVotingPower()" disabled id="checkVotingPowerBtn">Check Voting Power</button>
-            <div id="votingPowerResult"></div>
+            <div id="checkVotingPowerResult"></div>
         </div>
 
         <div class="transaction-section">
@@ -440,8 +440,8 @@
                 <label for="delegateAddress">Delegatee Address:</label>
                 <input type="text" id="delegateAddress" placeholder="0x... (leave empty to delegate to self)" />
             </div>
-            <button onclick="delegateVotingPower()" disabled id="delegateBtn">Delegate</button>
-            <div id="delegateResult"></div>
+            <button onclick="delegateVotingPower()" disabled id="delegateVotingPowerBtn">Delegate</button>
+            <div id="delegateVotingPowerResult"></div>
         </div>
 
         <div id="messages"></div>
@@ -606,9 +606,9 @@
                 contract = new ethers.Contract(contractAddress, TOKEN_ABI, signer);
 
                 document.getElementById('checkVotingPowerBtn').disabled = false;
-                document.getElementById('delegateBtn').disabled = false;
-                document.getElementById('signAndSubmitBtn').disabled = false;
-                document.getElementById('deadlineStr').value = defaultPermitDeadline();
+                document.getElementById('delegateVotingPowerBtn').disabled = false;
+                document.getElementById('signAndSubmitPermitBtn').disabled = false;
+                document.getElementById('deadlineStr').value = getLocalDeadline(120);
 
                 updateUI();
 
@@ -639,9 +639,8 @@
                 document.getElementById('status').textContent = 'Connected to MetaMask';
                 document.getElementById('status').className = 'status connected';
                 document.getElementById('userAddress').innerHTML = explorerLink('address', userAccount);
-
                 // Enable buttons
-                const buttons = ['refreshBtn', 'transferBtn', 'approveBtn', 'checkAllowanceBtn', 'addTokenBtn'];
+                const buttons = ['refreshBtn', 'transferTokensBtn', 'approveTokensBtn', 'checkAllowanceBtn', 'signAndSubmitPermitBtn', 'checkVotingPowerBtn', 'delegateVotingPowerBtn', 'addTokenBtn'];
                 buttons.forEach(id => document.getElementById(id).disabled = false);
 
                 document.getElementById('connectBtn').textContent = 'Connected';
@@ -746,17 +745,14 @@
                 const decimals = await contract.decimals();
                 const amountWei = ethers.parseUnits(amount, decimals);
 
-                showMessage('Transaction pending... Please confirm in MetaMask', 'success');
+                showMessage('Transaction pending... Please confirm in MetaMask', 'info');
                 const tx = await contract.transfer(to, amountWei);
 
                 showMessage('Transaction submitted! Waiting for confirmation...', 'success');
                 await tx.wait();
-
-                showMessage(`Transfer successful! Tx: ${tx.hash}`, 'success');
                 await refreshData();
 
-                const explorer = currentNetwork.blockExplorer;
-                document.getElementById('transferResult').innerHTML = `
+                document.getElementById('transferTokensResult').innerHTML = `
                             <div class="success">
                                 Transfer successul to ${explorerLink('address', to)}<br/>
                                 TX Hash: ${explorerLink('tx', tx.hash)}
@@ -786,12 +782,19 @@
                 const decimals = await contract.decimals();
                 const amountWei = ethers.parseUnits(amount, decimals);
 
-                showMessage('Transaction pending... Please confirm in MetaMask', 'success');
+                showMessage('Transaction pending... Please confirm in MetaMask', 'info');
                 const tx = await contract.approve(spender, amountWei);
 
                 showMessage('Transaction submitted! Waiting for confirmation...', 'success');
                 await tx.wait();
-                showMessage(`Approval successful! Tx: ${explorerLink('tx', tx.hash)}`, 'success');
+                await refreshData();
+
+                document.getElementById('approveTokensResult').innerHTML = `
+                            <div class="success">
+                                Approval successul to ${explorerLink('address', spender)}<br/>
+                                TX Hash: ${explorerLink('tx', tx.hash)}
+                            </div>
+                       `;
 
                 // Clear inputs
                 document.getElementById('approveSpender').value = '';
@@ -818,7 +821,7 @@
                 const symbol = await contract.symbol();
                 const formattedAllowance = ethers.formatUnits(allowance, decimals);
 
-                document.getElementById('allowanceResult').innerHTML = `
+                document.getElementById('checkAllowanceResult').innerHTML = `
                     <div class="success">
                         Allowance: ${parseFloat(formattedAllowance).toLocaleString()} ${symbol}
                     </div>
@@ -838,12 +841,15 @@
             }
 
             try {
-                document.getElementById('delegateBtn').disabled = true;
+                document.getElementById('delegateVotingPowerBtn').disabled = true;
                 showMessage('Sending delegation transaction...', 'info');
 
                 const tx = await contract.delegate(delegatee);
                 await tx.wait();
-                document.getElementById('delegateResult').innerHTML = `
+
+                await refreshData();
+
+                document.getElementById('delegateVotingPowerResult').innerHTML = `
             <div class="success">
                 Successfully delegated to ${explorerLink('address', delegatee)}<br>
                 Tx Hash: ${explorerLink('tx', tx.hash)}
@@ -855,7 +861,7 @@
                 console.error('Delegation error:', error);
                 showMessage(`Delegation failed: ${error.message}`, 'error');
             } finally {
-                document.getElementById('delegateBtn').disabled = false;
+                document.getElementById('delegateVotingPowerBtn').disabled = false;
             }
         }
 
@@ -876,7 +882,7 @@
                 const symbol = await contract.symbol();
                 const formattedVotes = ethers.formatUnits(votes, decimals);
 
-                document.getElementById('votingPowerResult').innerHTML = `
+                document.getElementById('checkVotingPowerResult').innerHTML = `
             <div class="success">
                 Voting Power: ${parseFloat(formattedVotes).toLocaleString()} ${symbol}
             </div>
@@ -911,7 +917,7 @@
 
             try {
                 // Disable button + info
-                const btn = document.getElementById('signAndSubmitBtn');
+                const btn = document.getElementById('signAndSubmitPermitBtn');
                 btn.disabled = true;
                 showMessage('Signing permit and sending transaction…', 'info');
 
@@ -935,6 +941,9 @@
                 }
                 const deadline = Math.floor(deadlineMs / 1000);
                 const nowSec = Math.floor(Date.now() / 1000);
+                console.log(deadline);
+                console.log(nowSec);
+
                 if (deadline <= nowSec) {
                     showMessage('Deadline must be in the future', 'error');
                     btn.disabled = false;
@@ -976,9 +985,9 @@
                 showMessage('Transaction submitted! Waiting for confirmation...', 'success');
 
                 await refreshData();
-
                 await tx.wait();
-                document.getElementById('signAndSubmitResult').innerHTML = `
+
+                document.getElementById('signAndSubmitPermitResult').innerHTML = `
                             <div class="success">
                                 Permit submitted successfully for ${explorerLink('address', spender)}<br/>
                                 Tx Hash: ${explorerLink('tx', tx.hash)}
@@ -989,7 +998,7 @@
                 console.error('Permit error:', error);
                 showMessage(`Permit failed: ${error.message} `, 'error');
             } finally {
-                document.getElementById('signAndSubmitBtn').disabled = false;
+                document.getElementById('signAndSubmitPermitBtn').disabled = false;
             }
         }
 
@@ -1051,22 +1060,23 @@
             }, 5000);
         }
 
-        // Utility
-        const nowPlusMins = (m) => new Date(Date.now() + m * 60 * 1000);
-        const toUnix = (d) => Math.floor(d.getTime() / 1000);
+        /**
+         * Returns a date string formatted for an <input type="datetime-local">,
+         * set to a specified number of minutes in the future.
+         * @param {number} minsFromNow - The number of minutes from now.
+         * @returns {string} The formatted date string (e.g., "2025-08-15T16:21").
+         */
+        function getLocalDeadline(minsFromNow = 60) {
+            // 1. Get the target date object
+            const targetDate = new Date(Date.now() + minsFromNow * 60 * 1000);
 
+            // 2. Use the built-in toISOString() method, which is the most reliable way
+            //    It returns a UTC string like "2025-08-15T14:21:08.123Z"
+            const isoString = targetDate.toISOString();
 
-        function defaultPermitDeadline() {
-            // +60 minutes by default
-            const dt = nowPlusMins(60);
-            // to local datetime-local formatted string
-            const pad = (n) => String(n).padStart(2, '0');
-            const yyyy = dt.getFullYear();
-            const mm = pad(dt.getMonth() + 1);
-            const dd = pad(dt.getDate());
-            const hh = pad(dt.getHours());
-            const mi = pad(dt.getMinutes());
-            return `${yyyy} -${mm} -${dd}T${hh}:${mi}`;
+            // 3. Slice the string to get the "YYYY-MM-DDTHH:MM" part,
+            //    which is exactly what the datetime-local input needs.
+            return isoString.slice(0, 16);
         }
 
 
