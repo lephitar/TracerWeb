@@ -12,6 +12,11 @@
         href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&family=Open+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.10.0/dist/index.umd.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/ledgerhq__hw-transport-webusb/6.27.1/ledgerhq-hw-transport-webusb.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/ledgerhq__hw-app-eth/6.33.1/ledgerhq-hw-app-eth.min.js"></script>
     <style>
         :root {
             --primary-blue: #2c59fb;
@@ -122,6 +127,79 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
+        }
+
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .wallet-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--bg-medium);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Comfortaa', cursive;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            text-decoration: none;
+            min-height: 100px;
+            justify-content: center;
+        }
+
+        .wallet-button:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-blue);
+            box-shadow: 0 12px 24px var(--shadow);
+            background: linear-gradient(135deg, var(--primary-blue), #1e40af);
+            color: white;
+        }
+
+        .wallet-button:active {
+            transform: translateY(-2px);
+        }
+
+        .wallet-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .wallet-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .connection-section {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 20px var(--shadow);
+        }
+
+        .connection-section h3 {
+            margin-top: 0;
+            color: var(--primary-blue);
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--bg-medium);
+            margin-bottom: 24px;
+            text-align: center;
         }
 
         button {
@@ -284,23 +362,98 @@
         </h1>
 
         <div class="notice">
-            <strong>⚠️ Early prototype:</strong> Connect through Metamask to see your TRCR holdings. Everything tested
-            to work.
+            <strong>⚠️ Early prototype:</strong> Connect through your wallet to see your TRCR holdings. Test the hell
+            out of it.
         </div>
 
         <div id="status" class="status disconnected">
-            Not Connected to MetaMask
+            Not Connected to Wallet
+        </div>
+
+        <div class="connection-section" id="walletSelection">
+            <h3>Choose Your Wallet</h3>
+            <div class="wallet-grid">
+                <div class="wallet-button" onclick="connectMetaMask()">
+                    <div class="wallet-icon">🦊</div>
+                    <span>MetaMask</span>
+                </div>
+                <div class="wallet-button" onclick="connectWalletConnect()">
+                    <div class="wallet-icon">🔗</div>
+                    <span>WalletConnect</span>
+                </div>
+                <div class="wallet-button" onclick="connectCoinbase()">
+                    <div class="wallet-icon">🔵</div>
+                    <span>Coinbase</span>
+                </div>
+                <div class="wallet-button" onclick="showLedgerOptions()">
+                    <div class="wallet-icon">🔒</div>
+                    <span>Ledger</span>
+                </div>
+                <div class="wallet-button disabled" title="Coming soon">
+                    <div class="wallet-icon">🌈</div>
+                    <span>Rainbow</span>
+                </div>
+                <div class="wallet-button disabled" title="Coming soon">
+                    <div class="wallet-icon">🛡️</div>
+                    <span>Trust Wallet</span>
+                </div>
+            </div>
+
+            <!-- Ledger Options Modal -->
+            <div id="ledgerModal"
+                style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+                <div
+                    style="background: var(--card-bg); padding: 40px; border-radius: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                    <h3 style="margin-top: 0; text-align: center; color: var(--primary-blue);">Connect Your Ledger</h3>
+                    <p style="text-align: center; margin-bottom: 30px; color: var(--text-secondary);">For desktop users,
+                        we recommend using MetaMask with your Ledger:</p>
+
+                    <div
+                        style="background: var(--bg-light); padding: 20px; border-radius: 16px; margin-bottom: 24px; border: 2px solid var(--primary-blue);">
+                        <h4 style="margin: 0 0 12px 0; color: var(--primary-blue);">🏆 Recommended: MetaMask + Ledger
+                        </h4>
+                        <ol style="margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 14px;">
+                            <li>Connect Ledger to computer via USB</li>
+                            <li>Open Ethereum app on Ledger</li>
+                            <li>In MetaMask: Settings → Advanced → Preferred Ledger Connection</li>
+                            <li>Connect Ledger account to MetaMask</li>
+                            <li>Click "MetaMask" button above</li>
+                        </ol>
+                    </div>
+
+                    <p style="text-align: center; margin: 20px 0; color: var(--text-light); font-size: 14px;">
+                        Or try these alternatives:
+                    </p>
+
+                    <div style="display: grid; gap: 16px; margin-bottom: 30px;">
+                        <div class="wallet-button" onclick="connectLedgerMobile()" style="margin: 0;">
+                            <div class="wallet-icon">📱</div>
+                            <div style="text-align: center;">
+                                <strong>Via Ledger Live Mobile</strong>
+                                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">Scan QR code with phone
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="closeLedgerModal()"
+                        style="width: 100%; background: linear-gradient(135deg, #6b7280, #4b5563);">
+                        Cancel
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="info-grid">
             <div class="info-card">
                 <h3>Network</h3>
                 <div id="network">Auto-detect from MetaMask</div>
+                <div class="contract-info">Supports Arbitrum One & Sepolia</div>
             </div>
 
             <div class="info-card">
                 <h3>Contract Address</h3>
-                <div class="contract-info" id="contractAddress">0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef</div>
+                <div class="contract-info" id="contractAddress">Connect wallet to view</div>
             </div>
 
             <div class="info-card">
@@ -335,13 +488,13 @@
                 <h3>Voting Power Holder</h3>
                 <div id="delegates">Loading...</div>
             </div>
-
         </div>
 
-        <div class="actions">
-            <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
-            <button id="refreshBtn" onclick="refreshData()" disabled>Refresh Data</button>
-            <button onclick="addToMetaMask()" disabled id="addTokenBtn">Add Token to MetaMask</button>
+        <div class="actions" id="connectedActions" style="display: none;">
+            <button id="refreshBtn" onclick="refreshData()">Refresh Data</button>
+            <button onclick="addTokenToWallet()" id="addTokenBtn">Add Token to Wallet</button>
+            <button onclick="disconnectWallet()" id="disconnectBtn"
+                style="background: linear-gradient(135deg, #ef4444, #dc2626);">Disconnect</button>
         </div>
 
         <div class="transaction-section">
@@ -461,7 +614,8 @@
         };
 
         let currentNetwork = null;
-        let contractAddress = null;
+        let CONTRACT_ADDRESS = null;
+
         // ERC20 ABI with ERC20Votes and ERC20Permit functions
         const TOKEN_ABI = [
             // Standard ERC20
@@ -497,20 +651,23 @@
             "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)"
         ];
 
-        let provider, signer, contract, userAccount;
+        let provider, signer, contract, userAccount, connectedWallet;
+
+        // Wallet connection state
+        let walletConnectProvider = null;
 
         function detectNetwork(chainId) {
             const networkId = parseInt(chainId);
             currentNetwork = CONTRACTS[networkId];
 
             if (currentNetwork) {
-                contractAddress = currentNetwork.address;
+                CONTRACT_ADDRESS = currentNetwork.address;
                 document.getElementById('network').textContent = currentNetwork.name;
-                document.getElementById('contractAddress').textContent = currentNetwork.address;
+                document.getElementById('contractAddress').textContent = CONTRACT_ADDRESS;
                 return true;
             } else {
                 currentNetwork = null;
-                contractAddress = null;
+                CONTRACT_ADDRESS = null;
                 return false;
             }
         }
@@ -518,13 +675,13 @@
         function updateNetworkUI() {
             if (currentNetwork) {
                 document.getElementById('network').textContent = currentNetwork.name;
-                document.getElementById('contractAddress').textContent = currentNetwork.address;
+                document.getElementById('contractAddress').textContent = CONTRACT_ADDRESS;
 
                 // Show/hide mainnet warning
                 const isMainnet = currentNetwork.name === 'Arbitrum One';
                 let warning = document.getElementById('mainnetWarning');
 
-                if (isMainnet && contractAddress === '0x0000000000000000000000000000000000000000') {
+                if (isMainnet && CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {
                     if (!warning) {
                         warning = document.createElement('div');
                         warning.id = 'mainnetWarning';
@@ -538,88 +695,232 @@
             }
         }
 
-        async function connectWallet() {
+        async function connectMetaMask() {
             try {
                 if (typeof window.ethereum === 'undefined') {
-                    showMessage('MetaMask is not installed!', 'error');
-                    return;
-                }
-                // Add a small delay to ensure MetaMask is fully loaded
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Request account access with additional options for file:// protocol
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                    params: []
-                });
-
-                if (!accounts || accounts.length === 0) {
-                    throw new Error('No accounts found. Please unlock MetaMask.');
-                }
-
-                // Initialize ethers provider
-                provider = new ethers.BrowserProvider(window.ethereum);
-
-                // Wait for provider to be ready
-                await provider._detectNetwork();
-
-                // Get current network
-                const network = await provider.getNetwork();
-                const isSupported = detectNetwork(network.chainId.toString());
-
-                if (!isSupported) {
-                    showMessage(`Unsupported network. Please switch to Arbitrum One or Arbitrum Sepolia.`, 'error');
-                    updateNetworkUI();
+                    showMessage('MetaMask is not installed! Please install MetaMask extension.', 'error');
                     return;
                 }
 
-                signer = await provider.getSigner();
-                userAccount = await signer.getAddress();
-
-                // Initialize contract with current network
-                contract = new ethers.Contract(contractAddress, TOKEN_ABI, signer);
-
-                document.getElementById('checkVotingPowerBtn').disabled = false;
-                document.getElementById('delegateBtn').disabled = false;
-                document.getElementById('signAndSubmitBtn').disabled = false;
-                document.getElementById('deadlineStr').value = defaultPermitDeadline();
-
-                updateUI();
-
-                updateNetworkUI();
-
-                await refreshData();
-
-                showMessage(`Successfully connected to ${currentNetwork.name}!`, 'success');
+                await connectWithProvider(window.ethereum, 'MetaMask');
 
             } catch (error) {
-                console.error('Connection error:', error);
+                console.error('MetaMask connection error:', error);
+                handleConnectionError(error, 'MetaMask');
+            }
+        }
 
-                // Handle specific MetaMask errors
-                if (error.code === 4001) {
-                    showMessage('Connection cancelled by user', 'error');
-                } else if (error.code === -32002) {
-                    showMessage('Connection request already pending in MetaMask', 'error');
-                } else if (error.message.includes('origin')) {
-                    showMessage('MetaMask origin error. Try refreshing the page or using a local server.', 'error');
-                } else {
-                    showMessage(`Connection failed: ${error.message}`, 'error');
+        async function connectWalletConnect() {
+            try {
+                showMessage('Initializing WalletConnect v2...', 'success');
+
+                // Wait a moment to ensure the script is loaded
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                if (typeof window.EthereumProvider === 'undefined') {
+                    throw new Error('WalletConnect provider not loaded. Please refresh the page and try again.');
                 }
+
+                walletConnectProvider = await window.EthereumProvider.init({
+                    projectId: 'YOUR_PROJECT_ID', // Replace with your actual project ID
+                    chains: [42161, 421614], // Arbitrum One and Sepolia
+                    showQrModal: true,
+                    methods: [
+                        'eth_sendTransaction',
+                        'eth_signTransaction',
+                        'eth_sign',
+                        'personal_sign',
+                        'eth_signTypedData',
+                    ],
+                    events: ['chainChanged', 'accountsChanged'],
+                    metadata: {
+                        name: 'Tracer Token Interface',
+                        description: 'Tracer Token DApp',
+                        url: window.location.href,
+                        icons: [`${window.location.origin}/tracerlogo.png`]
+                    }
+                });
+
+                // Enable session (shows QR modal)
+                await walletConnectProvider.enable();
+
+                await connectWithProvider(walletConnectProvider, 'WalletConnect');
+
+            } catch (error) {
+                console.error('WalletConnect v2 connection error:', error);
+                handleConnectionError(error, 'WalletConnect');
+            }
+        }
+
+        async function connectCoinbase() {
+            try {
+                if (typeof window.ethereum !== 'undefined' && window.ethereum.isCoinbaseWallet) {
+                    await connectWithProvider(window.ethereum, 'Coinbase Wallet');
+                } else {
+                    showMessage('Coinbase Wallet not detected. Please install Coinbase Wallet extension or use WalletConnect.', 'error');
+                }
+            } catch (error) {
+                console.error('Coinbase connection error:', error);
+                handleConnectionError(error, 'Coinbase Wallet');
+            }
+        }
+
+        async function showLedgerOptions() {
+            const modal = document.getElementById('ledgerModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeLedgerModal() {
+            document.getElementById('ledgerModal').style.display = 'none';
+        }
+
+        async function connectLedgerMobile() {
+            closeLedgerModal();
+            try {
+                showMessage('📱 Instructions: 1) Install Ledger Live on phone 2) Connect Ledger to phone 3) Open Ethereum app on Ledger 4) Scan QR code', 'success');
+
+                // Wait a moment to ensure the script is loaded
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                if (typeof window.EthereumProvider === 'undefined') {
+                    throw new Error('WalletConnect provider not loaded. Please refresh the page and try again.');
+                }
+
+                walletConnectProvider = await window.EthereumProvider.init({
+                    projectId: 'YOUR_PROJECT_ID', // Replace with your actual project ID
+                    chains: [42161, 421614],
+                    showQrModal: true,
+                    methods: ['eth_sendTransaction', 'eth_signTransaction', 'eth_sign', 'personal_sign'],
+                    events: ['chainChanged', 'accountsChanged'],
+                    metadata: {
+                        name: 'Tracer Token - Ledger Connection',
+                        description: 'Connect your Ledger via Ledger Live mobile',
+                        url: window.location.href,
+                        icons: [`${window.location.origin}/tracerlogo.png`]
+                    }
+                });
+
+                await walletConnectProvider.enable();
+                await connectWithProvider(walletConnectProvider, 'Ledger (Mobile)');
+
+            } catch (error) {
+                console.error('Ledger mobile connection error:', error);
+                handleConnectionError(error, 'Ledger Mobile');
+            }
+        }
+
+        // Legacy function for backward compatibility
+        async function connectLedger() {
+            showLedgerOptions();
+        }
+
+        async function connectWithProvider(providerInstance, walletName) {
+            // Add a small delay to ensure provider is fully loaded
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Initialize ethers provider
+            provider = new ethers.BrowserProvider(providerInstance);
+
+            // Wait for provider to be ready
+            await provider._detectNetwork();
+
+            // Get current network
+            const network = await provider.getNetwork();
+            const isSupported = detectNetwork(network.chainId.toString());
+
+            if (!isSupported) {
+                showMessage(`Unsupported network. Please switch to Arbitrum One or Arbitrum Sepolia.`, 'error');
+                updateNetworkUI();
+                return;
+            }
+
+            signer = await provider.getSigner();
+            userAccount = await signer.getAddress();
+            connectedWallet = walletName;
+
+            // Initialize contract with current network
+            contract = new ethers.Contract(CONTRACT_ADDRESS, TOKEN_ABI, signer);
+
+            updateUI();
+            updateNetworkUI();
+            await refreshData();
+
+            showMessage(`Successfully connected to ${currentNetwork.name} via ${walletName}!`, 'success');
+        }
+
+        function handleConnectionError(error, walletName) {
+            if (error.code === 4001) {
+                showMessage(`${walletName} connection cancelled by user`, 'error');
+            } else if (error.code === -32002) {
+                showMessage(`${walletName} connection request already pending`, 'error');
+            } else if (error.message.includes('origin')) {
+                showMessage(`${walletName} origin error. Try refreshing the page or using a local server.`, 'error');
+            } else {
+                showMessage(`${walletName} connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function disconnectWallet() {
+            try {
+                if (walletConnectProvider && connectedWallet && connectedWallet.includes('WalletConnect') || connectedWallet.includes('Ledger')) {
+                    await walletConnectProvider.disconnect();
+                    walletConnectProvider = null;
+                }
+
+                // Reset all state
+                provider = null;
+                signer = null;
+                contract = null;
+                userAccount = null;
+                connectedWallet = null;
+                currentNetwork = null;
+                CONTRACT_ADDRESS = null;
+
+                // Reset UI
+                updateUI();
+                document.getElementById('balance').textContent = '0 TRCR';
+                document.getElementById('totalSupply').textContent = 'Loading...';
+                document.getElementById('nonce').textContent = '0';
+                document.getElementById('network').textContent = 'Auto-detect from Wallet';
+                document.getElementById('contractAddress').textContent = 'Connect wallet to view';
+
+                // Clear any warning messages
+                const warning = document.getElementById('mainnetWarning');
+                if (warning) warning.remove();
+
+                showMessage('Wallet disconnected successfully', 'success');
+
+            } catch (error) {
+                console.error('Disconnect error:', error);
+                showMessage(`Disconnect failed: ${error.message}`, 'error');
             }
         }
 
         function updateUI() {
             if (userAccount) {
-                document.getElementById('status').textContent = 'Connected to MetaMask';
+                document.getElementById('status').textContent = `Connected via ${connectedWallet}`;
                 document.getElementById('status').className = 'status connected';
                 document.getElementById('userAddress').textContent = userAccount;
 
-                // Enable buttons
-                const buttons = ['refreshBtn', 'transferBtn', 'approveBtn', 'checkAllowanceBtn', 'addTokenBtn'];
-                buttons.forEach(id => document.getElementById(id).disabled = false);
+                // Hide wallet selection and show connected actions
+                document.getElementById('walletSelection').style.display = 'none';
+                document.getElementById('connectedActions').style.display = 'grid';
 
-                document.getElementById('connectBtn').textContent = 'Connected';
-                document.getElementById('connectBtn').disabled = true;
+                // Enable transaction buttons
+                const buttons = ['transferBtn', 'approveBtn', 'checkAllowanceBtn'];
+                buttons.forEach(id => document.getElementById(id).disabled = false);
+            } else {
+                document.getElementById('status').textContent = 'Not Connected to Wallet';
+                document.getElementById('status').className = 'status disconnected';
+                document.getElementById('userAddress').textContent = 'Not Connected';
+
+                // Show wallet selection and hide connected actions
+                document.getElementById('walletSelection').style.display = 'block';
+                document.getElementById('connectedActions').style.display = 'none';
+
+                // Disable transaction buttons
+                const buttons = ['transferBtn', 'approveBtn', 'checkAllowanceBtn'];
+                buttons.forEach(id => document.getElementById(id).disabled = true);
             }
         }
 
@@ -941,26 +1242,29 @@
             }
         }
 
-        async function addToMetaMask() {
+        async function addTokenToWallet() {
             try {
                 const [symbol, decimals] = await Promise.all([
                     contract.symbol(),
                     contract.decimals()
                 ]);
 
-                await window.ethereum.request({
-                    method: 'wallet_watchAsset',
-                    params: {
-                        type: 'ERC20',
-                        options: {
-                            address: contractAddress,
-                            symbol: symbol.toString(),
-                            decimals: Number(decimals),
+                if (connectedWallet === 'MetaMask' && window.ethereum.request) {
+                    await window.ethereum.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: 'ERC20',
+                            options: {
+                                address: CONTRACT_ADDRESS,
+                                symbol: symbol,
+                                decimals: decimals,
+                            },
                         },
-                    },
-                });
-
-                showMessage('Token added to MetaMask!', 'success');
+                    });
+                    showMessage(`Token added to ${connectedWallet}!`, 'success');
+                } else {
+                    showMessage(`Manual token import: Address: ${CONTRACT_ADDRESS}, Symbol: ${symbol}, Decimals: ${decimals}`, 'success');
+                }
             } catch (error) {
                 console.error('Add token error:', error);
                 showMessage(`Failed to add token: ${error.message}`, 'error');
@@ -1006,10 +1310,10 @@
             // Wrap event listeners in try-catch to handle origin errors
             try {
                 window.ethereum.on('accountsChanged', function (accounts) {
-                    if (accounts.length === 0) {
-                        location.reload();
-                    } else {
-                        setTimeout(() => connectWallet(), 100);
+                    if (accounts.length === 0 || !userAccount) {
+                        disconnectWallet();
+                    } else if (connectedWallet === 'MetaMask') {
+                        setTimeout(() => connectMetaMask(), 100);
                     }
                 });
 
@@ -1017,9 +1321,11 @@
                     // Detect new network and reconnect
                     setTimeout(async () => {
                         try {
-                            await connectWallet();
+                            if (connectedWallet === 'MetaMask') {
+                                await connectMetaMask();
+                            }
                         } catch (error) {
-                            location.reload();
+                            console.warn('Auto-reconnect failed:', error);
                         }
                     }, 100);
                 });
@@ -1033,21 +1339,21 @@
             // Add delay to ensure page is fully loaded
             await new Promise(resolve => setTimeout(resolve, 500));
 
+            // Try to auto-connect MetaMask if available and previously connected
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // Check if MetaMask is unlocked and has connected accounts
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0) {
-                        // Add another small delay before connecting
-                        setTimeout(() => connectWallet(), 200);
+                        setTimeout(() => connectMetaMask(), 200);
                     }
                 } catch (error) {
                     console.warn('Auto-connect check failed:', error);
-                    // Don't show error message for auto-connect failures
                 }
-            } else {
-                console.warn('MetaMask not detected on page load');
             }
+
+            // Initialize default UI state
+            updateUI();
+            document.getElementById('contractAddress').textContent = 'Connect wallet to view';
         });
     </script>
 </body>
