@@ -764,30 +764,28 @@ window.addEventListener("load", async function () {
 document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("connectBtn")
-    ?.addEventListener("click", connectWallet());
-  document
-    .getElementById("refreshBtn")
-    ?.addEventListener("click", refreshData());
+    ?.addEventListener("click", connectWallet);
+  document.getElementById("refreshBtn")?.addEventListener("click", refreshData);
   document
     .getElementById("addTokenBtn")
-    ?.addEventListener("click", addToMetaMask());
+    ?.addEventListener("click", addToMetaMask);
   document
     .getElementById("transferBtn")
-    ?.addEventListener("click", transferTokens());
+    ?.addEventListener("click", transferTokens);
   document
     .getElementById("approveBtn")
-    ?.addEventListener("click", approveTokens());
+    ?.addEventListener("click", approveTokens);
   document
     .getElementById("checkAllowanceBtn")
-    ?.addEventListener("click", checkAllowance());
+    ?.addEventListener("click", checkAllowance);
 
   document
     .getElementById("signAndSubmitPermitBtn")
-    ?.addEventListener("click", signAndSubmitPermit());
+    ?.addEventListener("click", signAndSubmitPermit);
   document
     .getElementById("delegateVotingPowerBtn")
-    ?.addEventListener("click", delegateVotingPower());
+    ?.addEventListener("click", delegateVotingPower);
   document
     .getElementById("checkAllowanceBtn")
-    ?.addEventListener("click", checkAllowance());
+    ?.addEventListener("click", checkAllowance);
 });
