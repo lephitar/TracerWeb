@@ -10,6 +10,7 @@ import {
 import { showMessage } from "./ui.js";
 
 /* Operations */
+
 export async function transferTokens() {
   const to = document.getElementById("transferTo").value;
   const amount = document.getElementById("transferAmount").value;
@@ -313,5 +314,42 @@ export async function delegateVotingPower() {
     showMessage(`Delegation failed: ${error.message}`, "error");
   } finally {
     document.getElementById("delegateVotingPowerBtn").disabled = false;
+  }
+}
+
+export async function transferOwnership() {
+  const to = document.getElementById("transferTo").value;
+
+  if (!to) {
+    showMessage("Please fill in address", "error");
+    return;
+  }
+
+  try {
+    showMessage("Transaction pending... Please confirm in MetaMask", "info");
+    const tx = await getVesting().transferOwnership(to);
+
+    showMessage(
+      "Transaction submitted! Waiting for confirmation...",
+      "success"
+    );
+    await tx.wait();
+    await refreshData();
+
+    document.getElementById("transferOwbershipResult").innerHTML = `
+                            <div class="success">
+                                Transfer successul to ${explorerLink(
+                                  "address",
+                                  to
+                                )}<br/>
+                                TX Hash: ${explorerLink("tx", tx.hash)}
+                            </div>
+                       `;
+
+    // Clear inputs
+    document.getElementById("transferTo").value = "";
+  } catch (error) {
+    console.error("Transfer error:", error);
+    showMessage(`Transfer failed: ${error.message}`, "error");
   }
 }

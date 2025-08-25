@@ -269,6 +269,7 @@ function updateNetworkUI() {
  * @param {string} [label] - Optional label for the link text (defaults to value).
  * @returns {string} HTML string with link or plain text fallback.
  */
+
 export function explorerLink(type, value, label) {
   const explorer = getCurrentNetwork().blockExplorer;
   const text = label || value;

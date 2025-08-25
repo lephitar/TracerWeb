@@ -14,7 +14,23 @@ import {
   checkVotingPower,
   delegateVotingPower,
   signAndSubmitPermit,
+  transferOwnership,
 } from "./operations.js";
+
+export function getVestingAddress() {
+  return vesting;
+}
+// pass vesting address and switch
+const params = new URLSearchParams(location.search);
+
+let vesting = params.get("vesting");
+const isEthAddress = /^0x[a-fA-F0-9]{40}$/.test(vesting || "");
+if (isEthAddress) {
+  document.body.dataset.mode = "vesting";
+} else {
+  document.body.dataset.mode = "default";
+  vesting = null;
+}
 
 // Listen for account changes with error handling
 if (typeof window.ethereum !== "undefined") {
@@ -95,4 +111,5 @@ document.addEventListener("DOMContentLoaded", () => {
   on("signAndSubmitPermitBtn", signAndSubmitPermit);
   on("delegateVotingPowerBtn", delegateVotingPower);
   on("checkVotingPowerBtn", checkVotingPower);
+  on("transferOwnershipBtn", transferOwnership);
 });

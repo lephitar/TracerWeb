@@ -276,3 +276,18 @@
                 height: 50px;
             }
         }
+
+        /* 1) HIDE BY DEFAULT */
+        .show-default,
+        .show-vesting {
+            display: none;
+        }
+
+        /* 2) SHOW BASED ON BODY DATA ATTRIBUTE */
+        body[data-mode="default"] .show-default {
+            display: inline;
+        }
+
+        body[data-mode="vesting"] .show-vesting {
+            display: inline;
+        }

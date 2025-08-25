@@ -16,11 +16,12 @@
     <link rel="stylesheet" href="styles/app.css">
 </head>
 
-<body>
+<body data-mode="default">
     <div class="container">
         <h1>
             <img src="assets/tracericon.svg" alt="Tracer Logo" class="logo">
-            Tracer Token Dashboard
+            <span class="show-default">Tracer Token Dashboard</span>
+            <span class="show-vesting">Vesting Contract Dashboard</span>
         </h1>
 
         <div class="notice">
@@ -39,12 +40,12 @@
             </div>
 
             <div class="info-card">
-                <h3>Contract Address</h3>
+                <h3>Tracer Token Contract</h3>
                 <div class="contract-info" id="contractAddress">
                     0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef</div>
             </div>
 
-            <div class="info-card">
+            <div class="info-card show-default">
                 <h3>Total Supply</h3>
                 <div id="totalSupply">Loading...</div>
                 <div id="symbol"></div>
@@ -61,20 +62,25 @@
                 <div id="symbol"></div>
             </div>
 
-            <div class="info-card">
+            <div class="info-card show-default">
                 <h3>Permit Counter</h3>
                 <div id="nonce"></div>
             </div>
 
-            <div class="info-card">
+            <div class="info-card show-default">
                 <h3>Your Voting Power</h3>
                 <div id="votingPower">Loading...</div>
                 <div id="symbol"></div>
             </div>
 
-            <div class="info-card">
+            <div class="info-card show-default">
                 <h3>Voting Power Holder</h3>
                 <div id="delegates">Loading...</div>
+            </div>
+
+            <div class="info-card show-vesting">
+                <h3>Vesting Contract</h3>
+                <div class="contract-info" id="vestingAddress">Loading...</div>
             </div>
 
         </div>
@@ -85,7 +91,7 @@
             <button disabled id="addTokenBtn">Add Tracer to MetaMask</button>
         </div>
 
-        <div class="transaction-section">
+        <div class="transaction-section show-default">
             <h3>Transfer Tokens</h3>
             <div class="input-group">
                 <label for="transferTo">Recipient Address:</label>
@@ -99,7 +105,7 @@
             <div id="transferTokensResult"></div>
         </div>
 
-        <div class="transaction-section">
+        <div class="transaction-section show-default">
             <h3>Approve Allowance</h3>
             <div class="input-group">
                 <label for="approveSpender">Spender Address:</label>
@@ -113,7 +119,7 @@
             <div id="approveTokensResult"></div>
         </div>
 
-        <div class="transaction-section">
+        <div class="transaction-section show-default">
             <h3>Check Allowance</h3>
             <div class="input-group">
                 <label for="allowanceOwner">Owner Address:</label>
@@ -127,7 +133,7 @@
             <div id="checkAllowanceResult"></div>
         </div>
 
-        <div class="transaction-section">
+        <div class="transaction-section show-default">
             <h3>Permit via Signature</h3>
             <div class="input-group">
                 <label for="permitSpenderAddress">Permit Spender:</label>
@@ -146,7 +152,7 @@
             <div id="signAndSubmitPermitResult"></div>
         </div>
 
-        <div class="transaction-section">
+        <div class="transaction-section show-default">
             <h3>Check Voting Power</h3>
             <div class="input-group">
                 <label for="votingPowerAddress">Address:</label>
@@ -156,7 +162,7 @@
             <div id="checkVotingPowerResult"></div>
         </div>
 
-        <div class="transaction-section">
+        <div class="transaction-section show-default">
             <h3>Delegate Voting Power</h3>
             <div class="input-group">
                 <label for="delegateAddress">Delegatee Address:
@@ -165,6 +171,17 @@
             </div>
             <button disabled id="delegateVotingPowerBtn">Delegate Voting Power</button>
             <div id="delegateVotingPowerResult"></div>
+        </div>
+
+
+        <div class="ownership-section show-vesting">
+            <h3>Transfer Ownership</h3>
+            <div class="input-group">
+                <label for="transferTo">Recipient Address:</label>
+                <input type="text" id="transferTo" placeholder="0x..." />
+            </div>
+            <button disabled id="transferOwnershipBtn">Transfer</button>
+            <div id="transferOwnershipResult"></div>
         </div>
 
 
