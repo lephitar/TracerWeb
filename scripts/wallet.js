@@ -107,6 +107,7 @@ export async function connectWallet() {
     document.getElementById("delegateVotingPowerBtn").disabled = false;
     document.getElementById("signAndSubmitPermitBtn").disabled = false;
     document.getElementById("deadlineStr").value = getLocalDeadline(120);
+    document.getElementById("circulationTime").value = getLocalDeadline(0);
 
     updateUI();
 

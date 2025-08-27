@@ -285,9 +285,9 @@
 
         /* 2) SHOW BASED ON BODY DATA ATTRIBUTE */
         body[data-mode="default"] .show-default {
-            display: inline;
+            display: revert;
         }
 
         body[data-mode="vesting"] .show-vesting {
-            display: inline;
+            display: revert;
         }

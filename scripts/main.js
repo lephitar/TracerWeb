@@ -14,12 +14,18 @@ import {
   checkVotingPower,
   delegateVotingPower,
   signAndSubmitPermit,
+  circulationAt,
   transferOwnership,
 } from "./operations.js";
 
 export function getVestingAddress() {
   return vesting;
 }
+
+export function getVestingDestination() {
+  return;
+}
+
 // pass vesting address and switch
 const params = new URLSearchParams(location.search);
 
@@ -111,5 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   on("signAndSubmitPermitBtn", signAndSubmitPermit);
   on("delegateVotingPowerBtn", delegateVotingPower);
   on("checkVotingPowerBtn", checkVotingPower);
+  on("circulationBtn", circulationAt);
+  /*  */
   on("transferOwnershipBtn", transferOwnership);
 });

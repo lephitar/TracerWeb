@@ -26,7 +26,7 @@
 
         <div class="notice">
             <strong>⚠️ Early prototype:</strong> Connect your wallet with MetaMask (works with Ledger Nano) to view your
-            TRCR tokens. Contact support if you experience any problems 😂. v0.2
+            TRCR tokens. Contact support if you experience any problems 😂. v0.3
         </div>
 
         <div id="status" class="status disconnected">
@@ -82,6 +82,25 @@
                 <h3>Vesting Contract</h3>
                 <div class="contract-info" id="vestingAddress">Loading...</div>
             </div>
+
+            <div class="info-card show-vesting">
+                <h3>Vesting Destination</h3>
+                <div class="contract-info" id="vestingDestination">Loading...</div>
+            </div>
+
+            <div class="info-card show-vesting">
+                <h3>Unvested Balance</h3>
+                <div id="unvested"></div>
+                <div id="symbol"></div>
+            </div>
+
+            <div class="info-card show-vesting">
+                <h3>Releasable</h3>
+                <div id="releasable"></div>
+                <div id="symbol"></div>
+            </div>
+
+
 
         </div>
 
@@ -173,6 +192,15 @@
             <div id="delegateVotingPowerResult"></div>
         </div>
 
+        <div class="transaction-section show-default">
+            <h3>Circulation check</h3>
+            <div class="input-group">
+                <label for="circulationTime">Circulation at (local time):</label>
+                <input type="text" id="circulationTime" type="datetime-local" />
+            </div>
+            <button disabled id="circulationBtn">Check</button>
+            <div id="circulationResult"></div>
+        </div>
 
         <div class="ownership-section show-vesting">
             <h3>Transfer Ownership</h3>

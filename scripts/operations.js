@@ -317,6 +317,44 @@ export async function delegateVotingPower() {
   }
 }
 
+export async function circulationAt() {
+  const circulationAt = document.getElementById("circulationTime").value.trim(); // <input type="datetime-local">
+
+  if (!circulationAt) {
+    showMessage("Please choose a deadline (date & time)", "error");
+    return;
+  }
+
+  // Convert local datetime to UNIX seconds
+  const circulationAtQuery = new Date(circulationAt).getTime();
+  if (Number.isNaN(circulationAtQuery)) {
+    showMessage("Invalid deadline format", "error");
+    btn.disabled = false;
+    return;
+  }
+  const circulationAtValue = Math.floor(circulationAtQuery / 1000);
+  try {
+    const circulation = await getContract().circulatingSupplyAt(
+      BigInt(circulationAtValue)
+    );
+    const decimals = await getContract().decimals();
+    const symbol = await getContract().symbol();
+    const formattedCirculation = ethers.formatUnits(circulation, decimals);
+
+    document.getElementById("circulationResult").innerHTML = `
+                    <div class="success">
+                        Circulation: ${parseFloat(
+                          formattedCirculation
+                        ).toLocaleString()} ${symbol}
+                    </div>
+                `;
+  } catch (error) {
+    console.error("Circuation check error:", error);
+    showMessage(`Failed to check circulation: ${error.message}`, "error");
+  }
+  document.getElementById("circulationBtn").disabled = false;
+}
+
 export async function transferOwnership() {
   const to = document.getElementById("transferTo").value;
 

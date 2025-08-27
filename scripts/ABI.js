@@ -10,6 +10,7 @@ export const TOKEN_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+  "function circulatingSupplyAt(uint256 timestamp) view returns (uint256)",
 
   // ERC20Permit
   "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",

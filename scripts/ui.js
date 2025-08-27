@@ -1,6 +1,6 @@
 /* Operations */
 import { getUserAccount, explorerLink } from "./wallet.js";
-import { getVestingAddress } from "./main.js";
+import { getVestingAddress, getVestingDestination } from "./main.js";
 
 export function showMessage(message, type) {
   const messagesDiv = document.getElementById("messages");
@@ -23,6 +23,10 @@ export function updateUI() {
       "address",
       getVestingAddress()
     );
+    document.getElementById("vestingDestination").innerHTML = explorerLink(
+      "address",
+      getVestingDestination()
+    );
   }
   if (getUserAccount()) {
     document.getElementById("status").textContent = "Connected to MetaMask";
@@ -42,6 +46,7 @@ export function updateUI() {
       "checkVotingPowerBtn",
       "delegateVotingPowerBtn",
       "transferOwnershipBtn",
+      "circulationBtn",
     ];
     buttons.forEach((id) => (document.getElementById(id).disabled = false));
 
