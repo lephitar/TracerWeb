@@ -33,3 +33,37 @@ export const TOKEN_ABI = [
   "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
   "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
 ];
+
+// OpenZeppelin Contracts v5.x — VestingWallet
+export const VESTING_ABI = [
+  // Core getters
+  "function start() view returns (uint256)",
+  "function duration() view returns (uint256)",
+  "function end() view returns (uint256)",
+
+  // Released & releasable (ETH)
+  "function released() view returns (uint256)",
+  "function releasable() view returns (uint256)",
+
+  // Released & releasable (ERC20)
+  "function released(address token) view returns (uint256)",
+  "function releasable(address token) view returns (uint256)",
+
+  // Release (ETH & ERC20)
+  "function release()",
+  "function release(address token)",
+
+  // Vested amount (ETH & ERC20)
+  "function vestedAmount(uint64 timestamp) view returns (uint256)",
+  "function vestedAmount(address token, uint64 timestamp) view returns (uint256)",
+
+  // Ownable (beneficiary is the owner in OZ v5)
+  "function owner() view returns (address)",
+  "function transferOwnership(address newOwner)",
+  "function renounceOwnership()",
+
+  // Events
+  "event EtherReleased(uint256 amount)",
+  "event ERC20Released(address indexed token, uint256 amount)",
+  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+];

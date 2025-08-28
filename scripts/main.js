@@ -19,7 +19,7 @@ import {
 } from "./operations.js";
 
 export function getVestingAddress() {
-  return vesting;
+  return vestingAddress;
 }
 
 export function getVestingDestination() {
@@ -29,13 +29,13 @@ export function getVestingDestination() {
 // pass vesting address and switch
 const params = new URLSearchParams(location.search);
 
-let vesting = params.get("vesting");
-const isEthAddress = /^0x[a-fA-F0-9]{40}$/.test(vesting || "");
+let vestingAddress = params.get("vestingAddress");
+const isEthAddress = /^0x[a-fA-F0-9]{40}$/.test(vestingAddress || "");
 if (isEthAddress) {
   document.body.dataset.mode = "vesting";
 } else {
   document.body.dataset.mode = "default";
-  vesting = null;
+  vestingAddress = null;
 }
 
 // Listen for account changes with error handling

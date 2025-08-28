@@ -1,6 +1,7 @@
-import { CONTRACTS } from "./contracts.js";
-import { TOKEN_ABI } from "./ABI.js";
+import { tokenContract, vestingContract } from "./contracts.js";
+import { CHAINS, CONTRACTS } from "./config.js";
 import { updateUI, showMessage } from "./ui.js";
+import { getVestingAddress } from "./main.js";
 
 let signer;
 export function getSigner() {
@@ -22,9 +23,9 @@ export function getCurrentNetwork() {
   return currentNetwork;
 }
 
-let contractAddress = null;
+let tracerAddress = null;
 export function getContractAddress() {
-  return contractAddress;
+  return tracerAddress;
 }
 
 let userAccount;
@@ -32,21 +33,28 @@ export function getUserAccount() {
   return userAccount;
 }
 
+let vesting;
+export function getVesting() {
+  return vesting;
+}
+
 export function detectNetwork(chainId) {
   const networkId = parseInt(chainId);
-  currentNetwork = CONTRACTS[networkId];
-
+  currentNetwork = CHAINS[networkId];
+  console.log(networkId);
+  console.log(CONTRACTS[networkId].tracer);
+  console.log("OK");
   if (currentNetwork) {
-    contractAddress = currentNetwork.address;
+    tracerAddress = CONTRACTS[networkId].tracer;
     document.getElementById("network").textContent = currentNetwork.name;
-    document.getElementById("contractAddress").innerHTML = explorerLink(
+    document.getElementById("tracerAddress").innerHTML = explorerLink(
       "address",
-      currentNetwork.address
+      tracerAddress
     );
     return true;
   } else {
     currentNetwork = null;
-    contractAddress = null;
+    tracerAddress = null;
     return false;
   }
 }
@@ -101,8 +109,10 @@ export async function connectWallet() {
     userAccount = await signer.getAddress();
 
     // Initialize contract with current network
-    contract = new ethers.Contract(contractAddress, TOKEN_ABI, signer);
-
+    contract = tokenContract(tracerAddress, signer);
+    if (getVestingAddress()) {
+      vesting = vestingContract(getVestingAddress(), signer);
+    }
     document.getElementById("checkVotingPowerBtn").disabled = false;
     document.getElementById("delegateVotingPowerBtn").disabled = false;
     document.getElementById("signAndSubmitPermitBtn").disabled = false;
@@ -215,7 +225,7 @@ export async function addToMetaMask() {
       params: {
         type: "ERC20",
         options: {
-          address: contractAddress,
+          address: tracerAddress,
           symbol: symbol.toString(),
           decimals: Number(decimals),
           image: tokenImageURL,
@@ -233,7 +243,7 @@ export async function addToMetaMask() {
 function updateNetworkUI() {
   if (getCurrentNetwork()) {
     document.getElementById("network").textContent = getCurrentNetwork().name;
-    document.getElementById("contractAddress").innerHTML = explorerLink(
+    document.getElementById("tracerAddress").innerHTML = explorerLink(
       "address",
       getCurrentNetwork().address
     );

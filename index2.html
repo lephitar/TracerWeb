@@ -453,7 +453,7 @@
 
             <div class="info-card">
                 <h3>Contract Address</h3>
-                <div class="contract-info" id="contractAddress">Connect wallet to view</div>
+                <div class="contract-info" id="tracerAddress">Connect wallet to view</div>
             </div>
 
             <div class="info-card">
@@ -663,7 +663,7 @@
             if (currentNetwork) {
                 CONTRACT_ADDRESS = currentNetwork.address;
                 document.getElementById('network').textContent = currentNetwork.name;
-                document.getElementById('contractAddress').textContent = CONTRACT_ADDRESS;
+                document.getElementById('tracerAddress').textContent = CONTRACT_ADDRESS;
                 return true;
             } else {
                 currentNetwork = null;
@@ -675,7 +675,7 @@
         function updateNetworkUI() {
             if (currentNetwork) {
                 document.getElementById('network').textContent = currentNetwork.name;
-                document.getElementById('contractAddress').textContent = CONTRACT_ADDRESS;
+                document.getElementById('tracerAddress').textContent = CONTRACT_ADDRESS;
 
                 // Show/hide mainnet warning
                 const isMainnet = currentNetwork.name === 'Arbitrum One';
@@ -882,7 +882,7 @@
                 document.getElementById('totalSupply').textContent = 'Loading...';
                 document.getElementById('nonce').textContent = '0';
                 document.getElementById('network').textContent = 'Auto-detect from Wallet';
-                document.getElementById('contractAddress').textContent = 'Connect wallet to view';
+                document.getElementById('tracerAddress').textContent = 'Connect wallet to view';
 
                 // Clear any warning messages
                 const warning = document.getElementById('mainnetWarning');
@@ -1353,7 +1353,7 @@
 
             // Initialize default UI state
             updateUI();
-            document.getElementById('contractAddress').textContent = 'Connect wallet to view';
+            document.getElementById('tracerAddress').textContent = 'Connect wallet to view';
         });
     </script>
 </body>
