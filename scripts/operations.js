@@ -442,7 +442,7 @@ export async function circulationAt() {
 /* Vesting Contract Operations */
 
 export async function transferOwnership() {
-  const to = document.getElementById("transferTo").value;
+  const to = document.getElementById("newOwner").value;
 
   if (!to) {
     showMessage("Please enter recipient address", "error");
