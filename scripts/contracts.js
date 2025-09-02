@@ -1,4 +1,4 @@
-import { TOKEN_ABI, VESTING_ABI } from "./abi.js";
+import { TOKEN_ABI, VESTING_ABI } from "./ABI.js";
 
 export function tokenContract(address, runner) {
   return new ethers.Contract(address, TOKEN_ABI, runner);
