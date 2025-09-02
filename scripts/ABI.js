@@ -1,4 +1,4 @@
-// ERC20 ABI with ERC20Votes and ERC20Permit functions
+// OpenZeppelin Contracts v5.x — ERC20 ABI with ERC20Votes and ERC20Permit functions, plus circulation
 export const TOKEN_ABI = [
   // Standard ERC20
   "function name() view returns (string)",
@@ -10,7 +10,6 @@ export const TOKEN_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-  "function circulatingSupplyAt(uint256 timestamp) view returns (uint256)",
 
   // ERC20Permit
   "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
@@ -32,6 +31,9 @@ export const TOKEN_ABI = [
   "event Approval(address indexed owner, address indexed spender, uint256 value)",
   "event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)",
   "event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)",
+
+  // Custom circulation function
+  "function circulatingSupplyAt(uint256 timestamp) view returns (uint256)",
 ];
 
 // OpenZeppelin Contracts v5.x — VestingWallet
