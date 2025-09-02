@@ -497,7 +497,7 @@ export async function releaseTokens() {
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
 
     const tokenAddress = await getContract().getAddress();
-    const tx = await getVesting().release(tokenAddress);
+    const tx = await getVesting()["release(address)"](tokenAddress);
 
     showMessage(
       "Transaction submitted! Waiting for confirmation...",

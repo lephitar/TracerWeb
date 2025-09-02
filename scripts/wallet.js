@@ -1,4 +1,4 @@
-import { tokenContract, vestingContract } from "./contracts.js";
+import { getTokenContract, getVestingContract } from "./contracts.js";
 import { CHAINS, CONTRACTS } from "./config.js";
 import { updateUI, showMessage } from "./ui.js";
 
@@ -12,9 +12,9 @@ export function getProvider() {
   return provider;
 }
 
-let contract;
+let tracerContract;
 export function getContract() {
-  return contract;
+  return tracerContract;
 }
 
 let currentNetwork = null;
@@ -32,14 +32,15 @@ export function getUserAccount() {
   return userAccount;
 }
 
-let vesting;
+let vestingContract;
 export function getVesting() {
-  return vesting;
+  return vestingContract;
 }
 
 export function detectNetwork(chainId) {
   const networkId = parseInt(chainId);
   currentNetwork = CHAINS[networkId];
+  console.log(currentNetwork.name);
   if (currentNetwork) {
     tracerAddress = CONTRACTS[networkId].tracer;
     document.getElementById("network").textContent = currentNetwork.name;
@@ -105,9 +106,9 @@ export async function connectWallet() {
     userAccount = await signer.getAddress();
 
     // Initialize contract with current network
-    contract = tokenContract(tracerAddress, signer);
+    tracerContract = getTokenContract(tracerAddress, signer);
     if (window.appState.isVestingMode) {
-      vesting = vestingContract(window.vestingAddress, signer);
+      vestingContract = getVestingContract(window.vestingAddress, signer);
     }
     document.getElementById("checkVotingPowerBtn").disabled = false;
     document.getElementById("delegateVotingPowerBtn").disabled = false;
@@ -142,7 +143,7 @@ export async function connectWallet() {
 }
 
 export async function refreshData() {
-  if (!contract || !userAccount) return;
+  if (!tracerContract || !userAccount) return;
 
   try {
     // Get token info
@@ -156,14 +157,14 @@ export async function refreshData() {
       votingPower,
       delegates,
     ] = await Promise.all([
-      contract.balanceOf(userAccount),
-      contract.totalSupply(),
-      contract.nonces(userAccount),
-      contract.name(),
-      contract.symbol(),
-      contract.decimals(),
-      contract.getVotes(userAccount),
-      contract.delegates(userAccount),
+      tracerContract.balanceOf(userAccount),
+      tracerContract.totalSupply(),
+      tracerContract.nonces(userAccount),
+      tracerContract.name(),
+      tracerContract.symbol(),
+      tracerContract.decimals(),
+      tracerContract.getVotes(userAccount),
+      tracerContract.delegates(userAccount),
     ]);
 
     // Format and display
@@ -201,17 +202,17 @@ export async function refreshData() {
     }
 
     if (window.appState.isVestingMode) {
-      const tokenAddr = await contract.getAddress(); // ok whether sync/async
-      const vestingAddr = await vesting.getAddress();
+      const tokenAddr = await tracerContract.getAddress(); // ok whether sync/async
+      const vestingAddr = await vestingContract.getAddress();
 
       const [vestingStart, vestingEnd, released, releasable, owner, balance] =
         await Promise.all([
-          vesting.start(),
-          vesting.end(),
-          vesting["released(address)"](tokenAddr), // ✅ ERC20 overload
-          vesting["releasable(address)"](tokenAddr), // ✅ ERC20 overload
-          vesting.owner(),
-          contract.balanceOf(vestingAddr),
+          vestingContract.start(),
+          vestingContract.end(),
+          vestingContract["released(address)"](tokenAddr), // ✅ ERC20 overload
+          vestingContract["releasable(address)"](tokenAddr), // ✅ ERC20 overload
+          vestingContract.owner(),
+          tracerContract.balanceOf(vestingAddr),
         ]);
 
       document.getElementById("vestingDestination").innerHTML = explorerLink(
@@ -251,8 +252,8 @@ export async function refreshData() {
 export async function addToMetaMask() {
   try {
     const [symbol, decimals] = await Promise.all([
-      contract.symbol(),
-      contract.decimals(),
+      tracerContract.symbol(),
+      tracerContract.decimals(),
     ]);
     const tokenImageURL =
       "https://tracer.endglobalwarming.net/assets/tracerroundicon.svg";
