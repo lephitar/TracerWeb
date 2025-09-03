@@ -35,25 +35,37 @@
 
         <div class="info-grid">
             <div class="info-card">
-                <h3>Network</h3>
-                <div id="network">Auto-detect from MetaMask</div>
-            </div>
-
-            <div class="info-card">
                 <h3>Tracer Token Contract</h3>
                 <div class="contract-info" id="tracerAddress">
                     0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Connected Wallet <span id="ownerBadge" class="badge" hidden>Owner</span>
+
+                </h3>
+                <div class="contract-info" id="userAddress">Not Connected</div>
+            </div>
+
+            <div class="info-card show-vesting">
+                <h3>Vesting Contract</h3>
+                <div class="contract-info" id="vestingAddress">Loading...</div>
+            </div>
+
+            <div class="info-card show-vesting">
+                <h3>Vesting Destination</h3>
+                <div class="contract-info" id="vestingDestination">Loading...</div>
+            </div>
+
+            <div class="info-card">
+                <h3>Network</h3>
+                <div id="network">Auto-detect from MetaMask</div>
             </div>
 
             <div class="info-card show-default">
                 <h3>Total Supply</h3>
                 <div id="totalSupply">Loading...</div>
                 <div id="symbol"></div>
-            </div>
-
-            <div class="info-card">
-                <h3>Your Address</h3>
-                <div class="contract-info" id="userAddress">Not Connected</div>
             </div>
 
             <div class="info-card show-default">
@@ -76,16 +88,6 @@
             <div class="info-card show-default">
                 <h3>Voting Power Holder</h3>
                 <div id="delegates">Loading...</div>
-            </div>
-
-            <div class="info-card show-vesting">
-                <h3>Vesting Contract</h3>
-                <div class="contract-info" id="vestingAddress">Loading...</div>
-            </div>
-
-            <div class="info-card show-vesting">
-                <h3>Vesting Destination</h3>
-                <div class="contract-info" id="vestingDestination">Loading...</div>
             </div>
 
             <div class="info-card show-vesting">

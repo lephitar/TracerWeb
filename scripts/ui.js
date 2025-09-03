@@ -48,8 +48,11 @@ export function updateUI() {
       "address",
       ""
     );
-    document.getElementById("transferOwnershipBtn").disabled =
-      getUserAccount() != getVestingOwner();
+    const isNotOwner = getUserAccount() != getVestingOwner();
+
+    document.getElementById("transferOwnershipBtn").disabled = isNotOwner;
+
+    document.getElementById("ownerBadge").hidden = isNotOwner;
   }
 }
 

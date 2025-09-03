@@ -291,3 +291,22 @@
         body[data-mode="vesting"] .show-vesting {
             display: revert;
         }
+
+        .badge {
+            display: inline-flex;
+            /* stays on same line */
+            align-items: center;
+            padding: 2px 8px;
+            margin-left: 8px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            vertical-align: middle;
+            background: linear-gradient(135deg, #7FB800, #608B00);
+            color: white;
+            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .badge[hidden] {
+            display: none !important;
+        }
