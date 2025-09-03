@@ -1,5 +1,6 @@
 /* Operations */
 import { getUserAccount, explorerLink, getVestingOwner } from "./wallet.js";
+import { appState } from "../core/state.js"; // ADD this line
 
 export function showMessage(message, type = "success") {
   const messagesDiv = document.getElementById("messages");
@@ -39,7 +40,7 @@ export function updateUI() {
     document.getElementById("connectBtn").textContent = "Connected";
     document.getElementById("connectBtn").disabled = true;
   }
-  if (window.appState.isVestingMode) {
+  if (appState.getState("ui.isVestingMode")) {
     document.getElementById("vestingAddress").innerHTML = explorerLink(
       "address",
       window.vestingAddress

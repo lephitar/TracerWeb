@@ -2,53 +2,63 @@ import { getTokenContract, getVestingContract } from "./contracts.js";
 import { CHAINS, CONTRACTS } from "./config.js";
 import { updateUI, showMessage } from "./ui.js";
 import { formatAmount, toLocalFromSeconds } from "./utils.js";
+import { appState } from "../core/state.js"; // ADD this import
 
-let signer;
+// REMOVE these global variables:
+// let signer;
+// let provider;
+// let tracerContract;
+// let currentNetwork = null;
+// let tracerAddress = null;
+// let userAccount;
+// let vestingContract;
+// let vestingOwner;
+
+// REPLACE with getters that use appState:
 export function getSigner() {
-  return signer;
+  return appState.getState("wallet.signer");
 }
 
-let provider;
 export function getProvider() {
-  return provider;
+  return appState.getState("wallet.provider");
 }
 
-let tracerContract;
 export function getContract() {
-  return tracerContract;
+  return appState.getState("contracts.token");
 }
 
-let currentNetwork = null;
 export function getCurrentNetwork() {
-  return currentNetwork;
+  return appState.getState("wallet.network");
 }
 
-let tracerAddress = null;
 export function getContractAddress() {
-  return tracerAddress;
+  return appState.getState("contracts.tokenAddress");
 }
 
-let userAccount;
 export function getUserAccount() {
-  return userAccount;
+  return appState.getState("wallet.account");
 }
 
-let vestingContract;
 export function getVesting() {
-  return vestingContract;
+  return appState.getState("contracts.vesting");
 }
 
-let vestingOwner;
 export function getVestingOwner() {
-  return vestingOwner;
+  return appState.getState("contracts.vestingOwner");
 }
 
 export function detectNetwork(chainId) {
   const networkId = parseInt(chainId);
-  currentNetwork = CHAINS[networkId];
-  console.log(currentNetwork.name);
+  const currentNetwork = CHAINS[networkId];
+  console.log(currentNetwork?.name);
+
   if (currentNetwork) {
-    tracerAddress = CONTRACTS[networkId].tracer;
+    const tracerAddress = CONTRACTS[networkId].tracer;
+
+    // UPDATE state instead of global variables:
+    appState.setState("wallet.network", currentNetwork);
+    appState.setState("contracts.tokenAddress", tracerAddress);
+
     document.getElementById("network").textContent = currentNetwork.name;
     document.getElementById("tracerAddress").innerHTML = explorerLink(
       "address",
@@ -56,13 +66,11 @@ export function detectNetwork(chainId) {
     );
     return true;
   } else {
-    currentNetwork = null;
-    tracerAddress = null;
+    appState.setState("wallet.network", null);
+    appState.setState("contracts.tokenAddress", null);
     return false;
   }
 }
-
-/* Buttons */
 
 export async function connectWallet() {
   try {
@@ -70,7 +78,7 @@ export async function connectWallet() {
       showMessage("MetaMask is not installed!", "error");
       return;
     }
-    // Ensure MetaMask is fully loaded
+
     await new Promise((resolve) => {
       if (document.readyState === "complete") {
         resolve();
@@ -79,7 +87,6 @@ export async function connectWallet() {
       }
     });
 
-    // Request account access with additional options for file:// protocol
     const accounts = await window.ethereum.request({
       method: "eth_requestAccounts",
       params: [],
@@ -89,13 +96,12 @@ export async function connectWallet() {
       throw new Error("No accounts found. Please unlock MetaMask.");
     }
 
-    // Initialize ethers provider
-    provider = new ethers.BrowserProvider(window.ethereum);
+    // REPLACE global variable assignments with appState:
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    appState.setState("wallet.provider", provider);
 
-    // Wait for provider to be ready
     await provider._detectNetwork();
 
-    // Get current network
     const network = await provider.getNetwork();
     const isSupported = detectNetwork(network.chainId.toString());
 
@@ -108,15 +114,28 @@ export async function connectWallet() {
       return;
     }
 
-    signer = await provider.getSigner();
-    userAccount = await signer.getAddress();
+    const signer = await provider.getSigner();
+    const userAccount = await signer.getAddress();
 
-    // Initialize contract with current network
-    tracerContract = getTokenContract(tracerAddress, signer);
-    if (window.appState.isVestingMode) {
-      vestingContract = getVestingContract(window.vestingAddress, signer);
-      vestingOwner = await vestingContract.owner();
+    // UPDATE state:
+    appState.setState("wallet.signer", signer);
+    appState.setState("wallet.account", userAccount);
+    appState.setState("wallet.connected", true);
+
+    // Initialize contracts
+    const tracerContract = getTokenContract(
+      appState.getState("contracts.tokenAddress"),
+      signer
+    );
+    appState.setState("contracts.token", tracerContract);
+
+    if (appState.getState("ui.isVestingMode")) {
+      const vestingContract = getVestingContract(window.vestingAddress, signer);
+      const vestingOwner = await vestingContract.owner();
+      appState.setState("contracts.vesting", vestingContract);
+      appState.setState("contracts.vestingOwner", vestingOwner);
     }
+
     document.getElementById("checkVotingPowerBtn").disabled = false;
     document.getElementById("delegateVotingPowerBtn").disabled = false;
     document.getElementById("signAndSubmitPermitBtn").disabled = false;
@@ -124,16 +143,16 @@ export async function connectWallet() {
     document.getElementById("circulationTime").value = getLocalDeadline(0);
 
     updateUI();
-
     updateNetworkUI();
-
     await refreshData();
 
-    showMessage(`Successfully connected to ${currentNetwork.name}!`, "success");
+    showMessage(
+      `Successfully connected to ${getCurrentNetwork().name}!`,
+      "success"
+    );
   } catch (error) {
     console.error("Connection error:", error);
 
-    // Handle specific MetaMask errors
     if (error.code === 4001) {
       showMessage("Connection cancelled by user", "error");
     } else if (error.code === -32002) {
@@ -150,10 +169,12 @@ export async function connectWallet() {
 }
 
 export async function refreshData() {
+  const tracerContract = getContract();
+  const userAccount = getUserAccount();
+
   if (!tracerContract || !userAccount) return;
 
   try {
-    // Get token info
     const [
       balance,
       totalSupply,
@@ -174,7 +195,17 @@ export async function refreshData() {
       tracerContract.delegates(userAccount),
     ]);
 
-    // Format and display
+    // UPDATE state with fetched data:
+    appState.setState("data.balance", balance);
+    appState.setState("data.totalSupply", totalSupply);
+    appState.setState("data.nonce", nonce);
+    appState.setState("data.votingPower", votingPower);
+    appState.setState("data.delegates", delegates);
+    appState.setState("data.name", name);
+    appState.setState("data.symbol", symbol);
+    appState.setState("data.decimals", decimals);
+
+    // Format and display (keep this part the same for now)
     const formattedBalance = formatAmount(balance, decimals);
     const formattedTotalSupply = formatAmount(totalSupply, decimals);
     const formattedVotingPower = formatAmount(votingPower, decimals);
@@ -201,23 +232,24 @@ export async function refreshData() {
       displayDelegate = delegates;
     }
     el.textContent = displayDelegate;
-    // Toggle the class only if it's an address
+
     if (ethers.isAddress(displayDelegate)) {
       el.classList.add("contract-info");
     } else {
       el.classList.remove("contract-info");
     }
 
-    if (window.appState.isVestingMode) {
-      const tokenAddr = await tracerContract.getAddress(); // ok whether sync/async
+    if (appState.getState("ui.isVestingMode")) {
+      const vestingContract = getVesting();
+      const tokenAddr = await tracerContract.getAddress();
       const vestingAddr = await vestingContract.getAddress();
 
       const [vestingStart, vestingEnd, released, releasable, owner, balance] =
         await Promise.all([
           vestingContract.start(),
           vestingContract.end(),
-          vestingContract["released(address)"](tokenAddr), // ✅ ERC20 overload
-          vestingContract["releasable(address)"](tokenAddr), // ✅ ERC20 overload
+          vestingContract["released(address)"](tokenAddr),
+          vestingContract["releasable(address)"](tokenAddr),
           vestingContract.owner(),
           tracerContract.balanceOf(vestingAddr),
         ]);
