@@ -417,7 +417,7 @@ export async function circulationAt() {
     updateResultContainer(
       "circulationResult",
       `
-      Circulation at ${new Date(
+      Max Possible Circulation at ${new Date(
         circulationTime
       ).toLocaleString()}: ${parseFloat(
         Math.floor(formattedCirculation)

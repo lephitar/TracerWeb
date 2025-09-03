@@ -37,6 +37,11 @@ export function getVesting() {
   return vestingContract;
 }
 
+let vestingOwner;
+export function getVestingOwner() {
+  return vestingOwner;
+}
+
 export function detectNetwork(chainId) {
   const networkId = parseInt(chainId);
   currentNetwork = CHAINS[networkId];
@@ -109,6 +114,7 @@ export async function connectWallet() {
     tracerContract = getTokenContract(tracerAddress, signer);
     if (window.appState.isVestingMode) {
       vestingContract = getVestingContract(window.vestingAddress, signer);
+      vestingOwner = await vestingContract.owner();
     }
     document.getElementById("checkVotingPowerBtn").disabled = false;
     document.getElementById("delegateVotingPowerBtn").disabled = false;

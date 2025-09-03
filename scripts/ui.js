@@ -1,5 +1,5 @@
 /* Operations */
-import { getUserAccount, explorerLink } from "./wallet.js";
+import { getUserAccount, explorerLink, getVestingOwner } from "./wallet.js";
 
 export function showMessage(message, type = "success") {
   const messagesDiv = document.getElementById("messages");
@@ -14,16 +14,6 @@ export function showMessage(message, type = "success") {
 }
 
 export function updateUI() {
-  if (window.appState.isVestingMode) {
-    document.getElementById("vestingAddress").innerHTML = explorerLink(
-      "address",
-      window.vestingAddress
-    );
-    document.getElementById("vestingDestination").innerHTML = explorerLink(
-      "address",
-      ""
-    );
-  }
   if (getUserAccount()) {
     document.getElementById("status").textContent = "Connected to MetaMask";
     document.getElementById("status").className = "status connected";
@@ -41,7 +31,6 @@ export function updateUI() {
       "signAndSubmitPermitBtn",
       "checkVotingPowerBtn",
       "delegateVotingPowerBtn",
-      "transferOwnershipBtn",
       "releaseTokensBtn",
       "circulationBtn",
     ];
@@ -49,6 +38,18 @@ export function updateUI() {
 
     document.getElementById("connectBtn").textContent = "Connected";
     document.getElementById("connectBtn").disabled = true;
+  }
+  if (window.appState.isVestingMode) {
+    document.getElementById("vestingAddress").innerHTML = explorerLink(
+      "address",
+      window.vestingAddress
+    );
+    document.getElementById("vestingDestination").innerHTML = explorerLink(
+      "address",
+      ""
+    );
+    document.getElementById("transferOwnershipBtn").disabled =
+      getUserAccount() != getVestingOwner();
   }
 }
 
