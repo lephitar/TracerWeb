@@ -476,7 +476,7 @@ export async function transferOwnership() {
     );
 
     // Clear input
-    document.getElementById("transferTo").value = "";
+    document.getElementById("newOwner").value = "";
     showMessage("Ownership transfer completed!", "success");
   } catch (error) {
     console.error("Transfer ownership error:", error);

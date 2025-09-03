@@ -67,11 +67,6 @@ export function formatNumber(value, decimals = 2) {
   });
 }
 
-// Validate Ethereum address
-export function isValidAddress(address) {
-  return ethers.isAddress(address);
-}
-
 // Truncate address for display
 export function truncateAddress(address, startLength = 6, endLength = 4) {
   if (!address) return "";

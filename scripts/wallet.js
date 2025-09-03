@@ -221,8 +221,8 @@ export async function refreshData() {
       );
 
       const formattedBalance = ethers.formatUnits(balance, decimals);
-      document.getElementById("vestingBalance").textContent = `${parseFloat(
-        formattedBalance
+      document.getElementById("unvestedBalance").textContent = `${parseFloat(
+        formattedBalance - formattedReleasable
       ).toLocaleString()} ${symbol}`;
 
       const formattedRelease = ethers.formatUnits(released, decimals);
