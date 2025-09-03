@@ -221,16 +221,17 @@ export async function refreshData() {
       );
 
       const formattedBalance = ethers.formatUnits(balance, decimals);
+      const formattedRelease = ethers.formatUnits(released, decimals);
+      const formattedReleasable = ethers.formatUnits(releasable, decimals);
+
       document.getElementById("unvestedBalance").textContent = `${parseFloat(
         formattedBalance - formattedReleasable
       ).toLocaleString()} ${symbol}`;
 
-      const formattedRelease = ethers.formatUnits(released, decimals);
       document.getElementById("releasedVesting").textContent = `${parseFloat(
         formattedRelease
       ).toLocaleString()} ${symbol}`;
 
-      const formattedReleasable = ethers.formatUnits(releasable, decimals);
       document.getElementById("releasableVesting").textContent = `${parseFloat(
         formattedReleasable
       ).toLocaleString()} ${symbol}`;
