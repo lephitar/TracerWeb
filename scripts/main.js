@@ -21,7 +21,7 @@ function checkMode() {
   if (vestingAddress && ethers.isAddress(vestingAddress)) {
     appState.setState("ui.isVestingMode", true);
     document.body.setAttribute("data-mode", "vesting");
-    appState.getState("contracts.vestingAddress") = vestingAddress;
+    appState.setState("contracts.vestingAddress", vestingAddress);
   } else {
     appState.setState("ui.isVestingMode", false);
     document.body.setAttribute("data-mode", "default");

@@ -1,6 +1,11 @@
 import { showMessage, setButtonLoading, updateResultContainer } from "./ui.js";
-import { formatAmount, toBigIntSecondsFromLocal } from "./utils.js";
+import {
+  formatAmount,
+  toBigIntSecondsFromLocal,
+  explorerLink,
+} from "./utils.js";
 import { appState } from "../core/state.js";
+import { refreshData } from "./wallet.js";
 
 /* ERC20 Token Operations */
 
@@ -194,13 +199,11 @@ export async function signAndSubmitPermit() {
     showMessage("Signing permit and sending transaction…", "info");
 
     // Gather data
-    const [decimals, name, tokenAddress, nonce, network] = await Promise.all([
-      appState.getState("data.decimaks"),
-      appState.getState("data.name"),
-      appState.getState("contract.tokenAddress"),
-      appState.getState("wallet.account"),
-      appState.getState("wallet.network"),
-    ]);
+    decimals = appState.getState("data.decimaks");
+    name = appState.getState("data.name");
+    tokenAddress = appState.getState("contracts.tokenAddress");
+    nonce = appState.getState("wallet.account");
+    network = appState.getState("wallet.network");
 
     const value = parseAmountToUnits(amountStr, decimals);
 
@@ -453,7 +456,9 @@ export async function transferOwnership() {
     setButtonLoading("transferOwnershipBtn", true);
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
 
-    const tx = await getVesting().transferOwnership(to);
+    const tx = await appState
+      .getState("contracts.vesting")
+      .transferOwnership(to);
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
       "success"
@@ -492,7 +497,9 @@ export async function releaseTokens() {
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
 
     const tokenAddress = appState.getState("contracts.token");
-    const tx = await getVesting()["release(address)"](tokenAddress);
+    const tx = await appState
+      .getState("contracts.vesting")
+      ["release(address)"](tokenAddress);
 
     showMessage(
       "Transaction submitted! Waiting for confirmation...",

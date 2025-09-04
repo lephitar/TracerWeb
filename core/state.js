@@ -32,6 +32,7 @@ export class AppState {
         vestingReleased: null,
         vestingReleasable: null,
         unvestedBalance: null,
+        vestingStarted: null,
       },
       ui: {
         loading: new Set(),

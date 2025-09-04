@@ -33,18 +33,6 @@ export function short(addr, n = 4) {
   return addr ? `${addr.slice(0, 2 + n)}…${addr.slice(-n)}` : "";
 }
 
-export function onMetaMaskEvents({ onAccounts, onChain }) {
-  if (!window.ethereum) return;
-  window.ethereum.on?.("accountsChanged", onAccounts);
-  window.ethereum.on?.("chainChanged", onChain);
-}
-
-export function offMetaMaskEvents({ onAccounts, onChain }) {
-  if (!window.ethereum) return;
-  window.ethereum.removeListener?.("accountsChanged", onAccounts);
-  window.ethereum.removeListener?.("chainChanged", onChain);
-}
-
 /**
  * Creates an HTML link to a blockchain explorer for a transaction, address, or contract.
  * @param {string} type - "tx" for transaction, "address" for wallet/contract.

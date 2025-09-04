@@ -1,6 +1,11 @@
 /* Operations */
-import { explorerLink } from "./utils.js";
 import { appState } from "../core/state.js"; // ADD this line
+import {
+  formatAmount,
+  toLocalFromSeconds,
+  explorerLink,
+  getLocalDeadline,
+} from "./utils.js";
 
 export function showMessage(message, type = "success") {
   const messagesDiv = document.getElementById("messages");
@@ -32,29 +37,164 @@ export function updateUI() {
       "signAndSubmitPermitBtn",
       "checkVotingPowerBtn",
       "delegateVotingPowerBtn",
-      "releaseTokensBtn",
       "circulationBtn",
     ];
+
     buttons.forEach((id) => (document.getElementById(id).disabled = false));
 
     document.getElementById("connectBtn").textContent = "Connected";
     document.getElementById("connectBtn").disabled = true;
-  }
-  if (appState.getState("ui.isVestingMode")) {
-    document.getElementById("vestingAddress").innerHTML = explorerLink(
-      "address",
-      appState.getState("contract.vestingAddress")
-    );
-    document.getElementById("vestingDestination").innerHTML = explorerLink(
-      "address",
-      appState.getState("contract.VestingOwner")
-    );
-    const isNotOwner =
-      appState.getState("wallet.account") !=
-      appState.getState("contracts.vestingOwner");
 
-    document.getElementById("transferOwnershipBtn").disabled = isNotOwner;
-    document.getElementById("ownerBadge").hidden = isNotOwner;
+    document.getElementById("deadlineStr").value = getLocalDeadline(120);
+    document.getElementById("circulationTime").value = getLocalDeadline(0);
+
+    const symbol = appState.getState("data.symbol");
+    const decimals = appState.getState("data.decimals");
+
+    // Format and display (keep this part the same for now)
+    const formattedBalance = formatAmount(
+      appState.getState("data.balance"),
+      decimals
+    );
+    const formattedTotalSupply = formatAmount(
+      appState.getState("data.totalSupply"),
+      decimals
+    );
+    const formattedVotingPower = formatAmount(
+      appState.getState("data.votingPower"),
+      decimals
+    );
+
+    document.getElementById(
+      "balance"
+    ).textContent = `${formattedBalance} ${symbol}`;
+    document.getElementById(
+      "totalSupply"
+    ).textContent = `${formattedTotalSupply} ${symbol}`;
+    document.getElementById("nonce").textContent = nonce.toString();
+    document.getElementById(
+      "votingPower"
+    ).textContent = `${formattedVotingPower} ${symbol}`;
+
+    const el = document.getElementById("delegates");
+
+    let displayDelegate;
+    if (delegates === ethers.ZeroAddress) {
+      displayDelegate = "No delegate set";
+    } else if (
+      appState.getState("data.delegates").toLowerCase() ===
+      appState.getState("wallet.account").toLowerCase()
+    ) {
+      displayDelegate = "Self-delegated";
+    } else {
+      displayDelegate = delegates;
+    }
+    el.textContent = displayDelegate;
+
+    if (ethers.isAddress(displayDelegate)) {
+      el.classList.add("contract-info");
+    } else {
+      el.classList.remove("contract-info");
+    }
+
+    if (appState.getState("ui.isVestingMode")) {
+      document.getElementById("vestingDestination").innerHTML = explorerLink(
+        "address",
+        appState.getState("contracts.vestingOwner")
+      );
+
+      const formattedUnvested = formatAmount(
+        appState.getState("data.unvestedBalance"),
+        decimals
+      );
+      document.getElementById(
+        "unvestedBalance"
+      ).textContent = `${formattedUnvested} ${symbol}`;
+
+      const formattedRelease = formatAmount(
+        appState.getState("data.vestingReleased"),
+        decimals
+      );
+      document.getElementById(
+        "releasedVesting"
+      ).textContent = `${formattedRelease} ${symbol}`;
+
+      const formattedReleasable = formatAmount(
+        appState.getState("data.vestingReleasable"),
+        decimals
+      );
+      document.getElementById(
+        "releasableVesting"
+      ).textContent = `${formattedReleasable} ${symbol}`;
+
+      const formattedStart = toLocalFromSeconds(
+        Number(appState.getState("data.vestingStart"))
+      );
+      document.getElementById("vestingStart").textContent = formattedStart;
+
+      const formattedEnd = toLocalFromSeconds(
+        Number(appState.getState("data.vestingEnd"))
+      );
+      document.getElementById("vestingEnd").textContent = formattedEnd;
+
+      document.getElementById("vestingAddress").innerHTML = explorerLink(
+        "address",
+        appState.getState("contracts.vestingAddress")
+      );
+      document.getElementById("vestingDestination").innerHTML = explorerLink(
+        "address",
+        appState.getState("contracts.VestingOwner")
+      );
+
+      // Activate transfer owenership only if owner
+      const isNotOwner =
+        appState.getState("wallet.account") !=
+        appState.getState("contracts.vestingOwner");
+
+      document.getElementById("transferOwnershipBtn").disabled = isNotOwner;
+      document.getElementById("ownerBadge").hidden = isNotOwner;
+
+      console.log("When updating ", appState.getState("data.vestingStarted"));
+      // Disable Release button if vesting hasn't started.
+      document.getElementById("releaseTokensBtn").disabled = !appState.getState(
+        "data.vestingStarted"
+      );
+    }
+  }
+}
+
+export function updateNetworkUI() {
+  if (appState.getState("wallet.network")) {
+    document.getElementById("network").textContent =
+      appState.getState("data.name");
+    document.getElementById("tracerAddress").innerHTML = explorerLink(
+      "address",
+      appState.getState("contracts.tokenAddress")
+    );
+
+    // Show/hide mainnet warning
+    const isMainnet =
+      appState.getState("wallet.network").name === "Arbitrum One";
+    let warning = document.getElementById("mainnetWarning");
+
+    if (
+      isMainnet &&
+      appState.getState("contracts.tokenAddress") ===
+        "0x0000000000000000000000000000000000000000"
+    ) {
+      if (!warning) {
+        warning = document.createElement("div");
+        warning.id = "mainnetWarning";
+        warning.className = "error";
+        warning.innerHTML =
+          "<strong>⚠️ Mainnet Warning:</strong> Please update the mainnet contract address in the code before using on Arbitrum One.";
+        document
+          .querySelector(".container")
+          .insertBefore(warning, document.getElementById("status"));
+      }
+    } else if (warning) {
+      warning.remove();
+    }
   }
 }
 
