@@ -15,6 +15,7 @@ export class AppState {
         vesting: null,
         tokenAddress: null,
         vestingAddress: null,
+        vestingOwner: null,
       },
       data: {
         balance: null,
@@ -22,6 +23,15 @@ export class AppState {
         votingPower: null,
         delegates: null,
         nonce: null,
+        name: null,
+        symbol: null,
+        decimals: null,
+        // Vesting data
+        vestingStart: null,
+        vestingEnd: null,
+        vestingReleased: null,
+        vestingReleasable: null,
+        unvestedBalance: null,
       },
       ui: {
         loading: new Set(),

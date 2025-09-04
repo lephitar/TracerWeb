@@ -1,16 +1,6 @@
-import {
-  getUserAccount,
-  getContract,
-  getProvider,
-  getSigner,
-  explorerLink,
-  refreshData,
-  getVesting,
-} from "./wallet.js";
-
 import { showMessage, setButtonLoading, updateResultContainer } from "./ui.js";
-
 import { formatAmount, toBigIntSecondsFromLocal } from "./utils.js";
+import { appState } from "../core/state.js";
 
 /* ERC20 Token Operations */
 
@@ -31,11 +21,13 @@ export async function transferTokens() {
   try {
     setButtonLoading("transferTokensBtn", true);
 
-    const decimals = await getContract().decimals();
+    const decimals = appState.getState("data.decimals");
     const amountWei = parseAmountToUnits(amount, decimals);
 
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
-    const tx = await getContract().transfer(to, amountWei);
+    const tx = await appState
+      .getState("contracts.token")
+      .transfer(to, amountWei);
 
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
@@ -87,11 +79,13 @@ export async function approveTokens() {
   try {
     setButtonLoading("approveTokensBtn", true);
 
-    const decimals = await getContract().decimals();
+    const decimals = appState.getState("data.decimals");
     const amountWei = parseAmountToUnits(amount, decimals);
 
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
-    const tx = await getContract().approve(spender, amountWei);
+    const tx = await appState
+      .getState("contracts.token")
+      .approve(spender, amountWei);
 
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
@@ -128,7 +122,8 @@ export async function approveTokens() {
 
 export async function checkAllowance() {
   const owner =
-    document.getElementById("allowanceOwner").value || getUserAccount();
+    document.getElementById("allowanceOwner").value ||
+    appState.getState("wallet.account");
   const spender = document.getElementById("allowanceSpender").value;
 
   if (!spender) {
@@ -149,9 +144,11 @@ export async function checkAllowance() {
   try {
     setButtonLoading("checkAllowanceBtn", true);
 
-    const allowance = await getContract().allowance(owner, spender);
-    const decimals = await getContract().decimals();
-    const symbol = await getContract().symbol();
+    const allowance = await appState
+      .getState("contracts.token")
+      .allowance(owner, spender);
+    const decimals = appState.getState("data.decimals");
+    const symbol = appState.getState("data.symbol");
     const formattedAllowance = formatAmount(allowance, decimals);
 
     updateResultContainer(
@@ -198,11 +195,11 @@ export async function signAndSubmitPermit() {
 
     // Gather data
     const [decimals, name, tokenAddress, nonce, network] = await Promise.all([
-      getContract().decimals(),
-      getContract().name(),
-      getContract().getAddress(),
-      getContract().nonces(getUserAccount()),
-      getProvider().getNetwork(),
+      appState.getState("data.decimaks"),
+      appState.getState("data.name"),
+      appState.getState("contract.tokenAddress"),
+      appState.getState("wallet.account"),
+      appState.getState("wallet.network"),
     ]);
 
     const value = parseAmountToUnits(amountStr, decimals);
@@ -235,7 +232,7 @@ export async function signAndSubmitPermit() {
     };
 
     const message = {
-      owner: getUserAccount(),
+      owner: appState.getState("wallet.account"),
       spender,
       value,
       nonce,
@@ -243,19 +240,23 @@ export async function signAndSubmitPermit() {
     };
 
     // Ask wallet to sign typed data (EIP-712)
-    const signature = await getSigner().signTypedData(domain, types, message);
+    const signature = await appState
+      .getState("wallet.signer")
+      .signTypedData(domain, types, message);
     const { v, r, s } = ethers.Signature.from(signature);
 
     // Submit permit on-chain
-    const tx = await getContract().permit(
-      getUserAccount(),
-      spender,
-      value,
-      deadline,
-      v,
-      r,
-      s
-    );
+    const tx = await appState
+      .getState("contracts.token")
+      .permit(
+        appState.getState("wallet.account"),
+        spender,
+        value,
+        deadline,
+        v,
+        r,
+        s
+      );
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
       "success"
@@ -295,7 +296,8 @@ export async function signAndSubmitPermit() {
 
 export async function checkVotingPower() {
   const address =
-    document.getElementById("votingPowerAddress").value || getUserAccount();
+    document.getElementById("votingPowerAddress").value ||
+    appState.getState("wallet.account");
 
   if (!ethers.isAddress(address)) {
     showMessage("Invalid address", "error");
@@ -306,9 +308,9 @@ export async function checkVotingPower() {
     setButtonLoading("checkVotingPowerBtn", true);
     showMessage("Fetching voting power...", "info");
 
-    const votes = await getContract().getVotes(address);
-    const decimals = await getContract().decimals();
-    const symbol = await getContract().symbol();
+    const votes = await appState.getState("contracts.token").getVotes(address);
+    const decimals = appState.getState("data.decimals");
+    const symbol = appState.getState("data.symbol");
     const formattedVotes = formatAmount(votes, decimals);
 
     updateResultContainer(
@@ -334,7 +336,8 @@ export async function checkVotingPower() {
 
 export async function delegateVotingPower() {
   const delegatee =
-    document.getElementById("delegateAddress").value || getUserAccount();
+    document.getElementById("delegateAddress").value ||
+    appState.getState("wallet.account");
 
   if (!ethers.isAddress(delegatee)) {
     showMessage("Invalid delegatee address", "error");
@@ -345,7 +348,7 @@ export async function delegateVotingPower() {
     setButtonLoading("delegateVotingPowerBtn", true);
     showMessage("Sending delegation transaction...", "info");
 
-    const tx = await getContract().delegate(delegatee);
+    const tx = await appState.getState("contracts.token").delegate(delegatee);
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
       "success"
@@ -395,14 +398,14 @@ export async function circulationAt() {
   try {
     setButtonLoading("circulationBtn", true);
 
-    const circulation = await getContract().circulatingSupplyAt(
-      circulationAtValue
-    );
-    const decimals = await getContract().decimals();
-    const symbol = await getContract().symbol();
+    const circulation = await appState
+      .getState("contracts.token")
+      .circulatingSupplyAt(circulationAtValue);
+    const decimals = appState.getState("data.decimals");
+    const symbol = appState.getState("data.symbol");
     const formattedCirculation = ethers.formatUnits(circulation, decimals);
     const circulatingSupply = ethers.formatUnits(
-      await getContract().totalSupply(),
+      appState.getState("data.totalsupply"),
       decimals
     );
 
@@ -488,7 +491,7 @@ export async function releaseTokens() {
     setButtonLoading("releaseTokensBtn", true);
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
 
-    const tokenAddress = await getContract().getAddress();
+    const tokenAddress = appState.getState("contracts.token");
     const tx = await getVesting()["release(address)"](tokenAddress);
 
     showMessage(

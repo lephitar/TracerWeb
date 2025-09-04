@@ -1,5 +1,5 @@
 /* Operations */
-import { getUserAccount, explorerLink, getVestingOwner } from "./wallet.js";
+import { explorerLink } from "./utils.js";
 import { appState } from "../core/state.js"; // ADD this line
 
 export function showMessage(message, type = "success") {
@@ -15,12 +15,12 @@ export function showMessage(message, type = "success") {
 }
 
 export function updateUI() {
-  if (getUserAccount()) {
+  if (appState.getState("wallet.account")) {
     document.getElementById("status").textContent = "Connected to MetaMask";
     document.getElementById("status").className = "status connected";
     document.getElementById("userAddress").innerHTML = explorerLink(
       "address",
-      getUserAccount()
+      appState.getState("wallet.account")
     );
     // Enable buttons
     const buttons = [
@@ -43,13 +43,15 @@ export function updateUI() {
   if (appState.getState("ui.isVestingMode")) {
     document.getElementById("vestingAddress").innerHTML = explorerLink(
       "address",
-      window.vestingAddress
+      appState.getState("contract.vestingAddress")
     );
     document.getElementById("vestingDestination").innerHTML = explorerLink(
       "address",
-      ""
+      appState.getState("contract.VestingOwner")
     );
-    const isNotOwner = getUserAccount() != getVestingOwner();
+    const isNotOwner =
+      appState.getState("wallet.account") !=
+      appState.getState("contracts.vestingOwner");
 
     document.getElementById("transferOwnershipBtn").disabled = isNotOwner;
     document.getElementById("ownerBadge").hidden = isNotOwner;

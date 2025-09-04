@@ -1,3 +1,5 @@
+import { appState } from "../core/state.js";
+
 export function $(id) {
   return document.getElementById(id);
 }
@@ -41,4 +43,54 @@ export function offMetaMaskEvents({ onAccounts, onChain }) {
   if (!window.ethereum) return;
   window.ethereum.removeListener?.("accountsChanged", onAccounts);
   window.ethereum.removeListener?.("chainChanged", onChain);
+}
+
+/**
+ * Creates an HTML link to a blockchain explorer for a transaction, address, or contract.
+ * @param {string} type - "tx" for transaction, "address" for wallet/contract.
+ * @param {string} value - Transaction hash or address.
+ * @param {number|string} chainId - The current chain ID.
+ * @param {string} [label] - Optional label for the link text (defaults to value).
+ * @returns {string} HTML string with link or plain text fallback.
+ */
+
+export function explorerLink(type, value, label) {
+  const explorer = appState.getState("wallet.network").blockExplorer;
+  const text = label || value;
+
+  if (!explorer || !value) {
+    return `<code>${text}</code>`;
+  }
+
+  // Normalize type to path
+  let path = "";
+  if (type === "tx") {
+    path = `tx/${value}`;
+    return `<code><a href="${explorer}${path}" target="_blank" rel="noopener">${text}</a></code>`;
+  } else if (type === "address") {
+    path = `address/${value}`;
+    return `<code><a style="cursor: pointer;" href="${explorer}${path}" target="_blank" rel="noopener">${text}</a></code>`;
+  } else {
+    console.warn("Unknown explorer link type:", type);
+    return `<code>${text}</code>`;
+  }
+}
+
+/**
+ * Returns a date string formatted for an <input type="datetime-local">,
+ * set to a specified number of minutes in the future.
+ * @param {number} minsFromNow - The number of minutes from now.
+ * @returns {string} The formatted date string (e.g., "2025-08-15T16:21").
+ */
+export function getLocalDeadline(minsFromNow = 60) {
+  // 1. Get the target date object
+  const targetDate = new Date(Date.now() + minsFromNow * 60 * 1000);
+
+  // 2. Use the built-in toISOString() method, which is the most reliable way
+  //    It returns a UTC string like "2025-08-15T14:21:08.123Z"
+  const isoString = targetDate.toISOString();
+
+  // 3. Slice the string to get the "YYYY-MM-DDTHH:MM" part,
+  //    which is exactly what the datetime-local input needs.
+  return isoString.slice(0, 16);
 }

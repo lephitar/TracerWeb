@@ -21,7 +21,7 @@ function checkMode() {
   if (vestingAddress && ethers.isAddress(vestingAddress)) {
     appState.setState("ui.isVestingMode", true);
     document.body.setAttribute("data-mode", "vesting");
-    window.vestingAddress = vestingAddress;
+    appState.getState("contracts.vestingAddress") = vestingAddress;
   } else {
     appState.setState("ui.isVestingMode", false);
     document.body.setAttribute("data-mode", "default");
@@ -31,13 +31,6 @@ function checkMode() {
 }
 
 checkMode();
-
-// ADD this for backward compatibility - so existing code still works
-window.appState = {
-  get isVestingMode() {
-    return appState.getState("ui.isVestingMode");
-  },
-};
 
 // Listen for account changes with error handling
 if (typeof window.ethereum !== "undefined") {

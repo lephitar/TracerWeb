@@ -1,51 +1,13 @@
 import { getTokenContract, getVestingContract } from "./contracts.js";
 import { CHAINS, CONTRACTS } from "./config.js";
 import { updateUI, showMessage } from "./ui.js";
-import { formatAmount, toLocalFromSeconds } from "./utils.js";
-import { appState } from "../core/state.js"; // ADD this import
-
-// REMOVE these global variables:
-// let signer;
-// let provider;
-// let tracerContract;
-// let currentNetwork = null;
-// let tracerAddress = null;
-// let userAccount;
-// let vestingContract;
-// let vestingOwner;
-
-// REPLACE with getters that use appState:
-export function getSigner() {
-  return appState.getState("wallet.signer");
-}
-
-export function getProvider() {
-  return appState.getState("wallet.provider");
-}
-
-export function getContract() {
-  return appState.getState("contracts.token");
-}
-
-export function getCurrentNetwork() {
-  return appState.getState("wallet.network");
-}
-
-export function getContractAddress() {
-  return appState.getState("contracts.tokenAddress");
-}
-
-export function getUserAccount() {
-  return appState.getState("wallet.account");
-}
-
-export function getVesting() {
-  return appState.getState("contracts.vesting");
-}
-
-export function getVestingOwner() {
-  return appState.getState("contracts.vestingOwner");
-}
+import {
+  formatAmount,
+  toLocalFromSeconds,
+  explorerLink,
+  getLocalDeadline,
+} from "./utils.js";
+import { appState } from "../core/state.js";
 
 export function detectNetwork(chainId) {
   const networkId = parseInt(chainId);
@@ -117,7 +79,6 @@ export async function connectWallet() {
     const signer = await provider.getSigner();
     const userAccount = await signer.getAddress();
 
-    // UPDATE state:
     appState.setState("wallet.signer", signer);
     appState.setState("wallet.account", userAccount);
     appState.setState("wallet.connected", true);
@@ -130,7 +91,10 @@ export async function connectWallet() {
     appState.setState("contracts.token", tracerContract);
 
     if (appState.getState("ui.isVestingMode")) {
-      const vestingContract = getVestingContract(window.vestingAddress, signer);
+      const vestingContract = getVestingContract(
+        appState.getState("contract.vestingAddress"),
+        signer
+      );
       const vestingOwner = await vestingContract.owner();
       appState.setState("contracts.vesting", vestingContract);
       appState.setState("contracts.vestingOwner", vestingOwner);
@@ -147,7 +111,7 @@ export async function connectWallet() {
     await refreshData();
 
     showMessage(
-      `Successfully connected to ${getCurrentNetwork().name}!`,
+      `Successfully connected to ${appState.getState("data.name")}!`,
       "success"
     );
   } catch (error) {
@@ -169,8 +133,8 @@ export async function connectWallet() {
 }
 
 export async function refreshData() {
-  const tracerContract = getContract();
-  const userAccount = getUserAccount();
+  const tracerContract = appState.getState("contracts.token");
+  const userAccount = appState.getState("wallet.account");
 
   if (!tracerContract || !userAccount) return;
 
@@ -195,7 +159,6 @@ export async function refreshData() {
       tracerContract.delegates(userAccount),
     ]);
 
-    // UPDATE state with fetched data:
     appState.setState("data.balance", balance);
     appState.setState("data.totalSupply", totalSupply);
     appState.setState("data.nonce", nonce);
@@ -254,6 +217,12 @@ export async function refreshData() {
           tracerContract.balanceOf(vestingAddr),
         ]);
 
+      appState.setState("data.vestingStart", vestingStart);
+      appState.setState("data.vestingEnd", vestingEnd);
+      appState.setState("data.vestingReleased", released);
+      appState.setState("data.vestingReleasable", releasable);
+      appState.setState("data.unvestedBalance", balance - releasable);
+
       document.getElementById("vestingDestination").innerHTML = explorerLink(
         "address",
         owner
@@ -290,19 +259,18 @@ export async function refreshData() {
 
 export async function addToMetaMask() {
   try {
-    const [symbol, decimals] = await Promise.all([
-      tracerContract.symbol(),
-      tracerContract.decimals(),
-    ]);
+    const symbol = appState.getState("data.symbol");
+    const decimals = appState.getState("data.decimals");
     const tokenImageURL =
       "https://tracer.endglobalwarming.net/assets/tracerroundicon.svg";
-
+    console.log(symbol, ", ", decimals, ", ", tokenImageURL);
+    console.log(appState.getState("contracts.tokenAddress"));
     await window.ethereum.request({
       method: "wallet_watchAsset",
       params: {
         type: "ERC20",
         options: {
-          address: tracerAddress,
+          address: appState.getState("contracts.tokenAddress"),
           symbol: symbol.toString(),
           decimals: Number(decimals),
           image: tokenImageURL,
@@ -318,20 +286,23 @@ export async function addToMetaMask() {
 }
 
 function updateNetworkUI() {
-  if (getCurrentNetwork()) {
-    document.getElementById("network").textContent = getCurrentNetwork().name;
+  if (appState.getState("wallet.network")) {
+    document.getElementById("network").textContent =
+      appState.getState("data.name");
     document.getElementById("tracerAddress").innerHTML = explorerLink(
       "address",
-      getContractAddress()
+      appState.getState("contracts.tokenAddress")
     );
 
     // Show/hide mainnet warning
-    const isMainnet = getCurrentNetwork().name === "Arbitrum One";
+    const isMainnet =
+      appState.getState("wallet.network").name === "Arbitrum One";
     let warning = document.getElementById("mainnetWarning");
 
     if (
       isMainnet &&
-      getContractAddress() === "0x0000000000000000000000000000000000000000"
+      appState.getState("contracts.tokenAddress") ===
+        "0x0000000000000000000000000000000000000000"
     ) {
       if (!warning) {
         warning = document.createElement("div");
@@ -347,54 +318,4 @@ function updateNetworkUI() {
       warning.remove();
     }
   }
-}
-
-/**
- * Creates an HTML link to a blockchain explorer for a transaction, address, or contract.
- * @param {string} type - "tx" for transaction, "address" for wallet/contract.
- * @param {string} value - Transaction hash or address.
- * @param {number|string} chainId - The current chain ID.
- * @param {string} [label] - Optional label for the link text (defaults to value).
- * @returns {string} HTML string with link or plain text fallback.
- */
-
-export function explorerLink(type, value, label) {
-  const explorer = getCurrentNetwork().blockExplorer;
-  const text = label || value;
-
-  if (!explorer || !value) {
-    return `<code>${text}</code>`;
-  }
-
-  // Normalize type to path
-  let path = "";
-  if (type === "tx") {
-    path = `tx/${value}`;
-    return `<code><a href="${explorer}${path}" target="_blank" rel="noopener">${text}</a></code>`;
-  } else if (type === "address") {
-    path = `address/${value}`;
-    return `<code><a style="cursor: pointer;" href="${explorer}${path}" target="_blank" rel="noopener">${text}</a></code>`;
-  } else {
-    console.warn("Unknown explorer link type:", type);
-    return `<code>${text}</code>`;
-  }
-}
-
-/**
- * Returns a date string formatted for an <input type="datetime-local">,
- * set to a specified number of minutes in the future.
- * @param {number} minsFromNow - The number of minutes from now.
- * @returns {string} The formatted date string (e.g., "2025-08-15T16:21").
- */
-function getLocalDeadline(minsFromNow = 60) {
-  // 1. Get the target date object
-  const targetDate = new Date(Date.now() + minsFromNow * 60 * 1000);
-
-  // 2. Use the built-in toISOString() method, which is the most reliable way
-  //    It returns a UTC string like "2025-08-15T14:21:08.123Z"
-  const isoString = targetDate.toISOString();
-
-  // 3. Slice the string to get the "YYYY-MM-DDTHH:MM" part,
-  //    which is exactly what the datetime-local input needs.
-  return isoString.slice(0, 16);
 }
