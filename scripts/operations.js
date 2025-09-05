@@ -3,6 +3,7 @@ import {
   formatAmount,
   toBigIntSecondsFromLocal,
   explorerLink,
+  parseAmountToUnits,
 } from "./utils.js";
 import { appState } from "../core/state.js";
 import { refreshData } from "./wallet.js";
@@ -26,12 +27,12 @@ export async function transferTokens() {
   try {
     setButtonLoading("transferTokensBtn", true);
 
-    const decimals = appState.getState("data.decimals");
+    const decimals = appState.getState("tracer.decimals");
     const amountWei = parseAmountToUnits(amount, decimals);
 
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
     const tx = await appState
-      .getState("contracts.token")
+      .getState("tracer.contract")
       .transfer(to, amountWei);
 
     showMessage(
@@ -84,12 +85,12 @@ export async function approveTokens() {
   try {
     setButtonLoading("approveTokensBtn", true);
 
-    const decimals = appState.getState("data.decimals");
+    const decimals = appState.getState("tracer.decimals");
     const amountWei = parseAmountToUnits(amount, decimals);
 
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
     const tx = await appState
-      .getState("contracts.token")
+      .getState("tracer.contract")
       .approve(spender, amountWei);
 
     showMessage(
@@ -150,10 +151,10 @@ export async function checkAllowance() {
     setButtonLoading("checkAllowanceBtn", true);
 
     const allowance = await appState
-      .getState("contracts.token")
+      .getState("tracer.contract")
       .allowance(owner, spender);
-    const decimals = appState.getState("data.decimals");
-    const symbol = appState.getState("data.symbol");
+    const decimals = appState.getState("tracer.decimals");
+    const symbol = appState.getState("tracer.symbol");
     const formattedAllowance = formatAmount(allowance, decimals);
 
     updateResultContainer(
@@ -199,9 +200,9 @@ export async function signAndSubmitPermit() {
     showMessage("Signing permit and sending transaction…", "info");
 
     // Gather data
-    decimals = appState.getState("data.decimaks");
-    name = appState.getState("data.name");
-    tokenAddress = appState.getState("contracts.tokenAddress");
+    decimals = appState.getState("tracer.decimals");
+    name = appState.getState("tracer.name");
+    tokenAddress = appState.getState("tracer.address");
     nonce = appState.getState("wallet.account");
     network = appState.getState("wallet.network");
 
@@ -250,7 +251,7 @@ export async function signAndSubmitPermit() {
 
     // Submit permit on-chain
     const tx = await appState
-      .getState("contracts.token")
+      .getState("tracer.contract")
       .permit(
         appState.getState("wallet.account"),
         spender,
@@ -311,9 +312,9 @@ export async function checkVotingPower() {
     setButtonLoading("checkVotingPowerBtn", true);
     showMessage("Fetching voting power...", "info");
 
-    const votes = await appState.getState("contracts.token").getVotes(address);
-    const decimals = appState.getState("data.decimals");
-    const symbol = appState.getState("data.symbol");
+    const votes = await appState.getState("tracer.contract").getVotes(address);
+    const decimals = appState.getState("tracer.decimals");
+    const symbol = appState.getState("tracer.symbol");
     const formattedVotes = formatAmount(votes, decimals);
 
     updateResultContainer(
@@ -351,7 +352,7 @@ export async function delegateVotingPower() {
     setButtonLoading("delegateVotingPowerBtn", true);
     showMessage("Sending delegation transaction...", "info");
 
-    const tx = await appState.getState("contracts.token").delegate(delegatee);
+    const tx = await appState.getState("tracer.contract").delegate(delegatee);
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
       "success"
@@ -402,13 +403,13 @@ export async function circulationAt() {
     setButtonLoading("circulationBtn", true);
 
     const circulation = await appState
-      .getState("contracts.token")
+      .getState("tracer.contract")
       .circulatingSupplyAt(circulationAtValue);
-    const decimals = appState.getState("data.decimals");
-    const symbol = appState.getState("data.symbol");
+    const decimals = appState.getState("tracer.decimals");
+    const symbol = appState.getState("tracer.symbol");
     const formattedCirculation = ethers.formatUnits(circulation, decimals);
     const circulatingSupply = ethers.formatUnits(
-      appState.getState("data.totalsupply"),
+      appState.getState("tracertData.totalSupply"),
       decimals
     );
 
@@ -457,7 +458,7 @@ export async function transferOwnership() {
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
 
     const tx = await appState
-      .getState("contracts.vesting")
+      .getState("vesting.contract")
       .transferOwnership(to);
     showMessage(
       "Transaction submitted! Waiting for confirmation...",
@@ -496,9 +497,9 @@ export async function releaseTokens() {
     setButtonLoading("releaseTokensBtn", true);
     showMessage("Transaction pending... Please confirm in MetaMask", "info");
 
-    const tokenAddress = appState.getState("contracts.token");
+    const tokenAddress = appState.getState("tracer.contract");
     const tx = await appState
-      .getState("contracts.vesting")
+      .getState("vesting.contract")
       ["release(address)"](tokenAddress);
 
     showMessage(

@@ -48,20 +48,20 @@ export function updateUI() {
     document.getElementById("deadlineStr").value = getLocalDeadline(120);
     document.getElementById("circulationTime").value = getLocalDeadline(0);
 
-    const symbol = appState.getState("data.symbol");
-    const decimals = appState.getState("data.decimals");
+    const symbol = appState.getState("tracer.symbol");
+    const decimals = appState.getState("tracer.decimals");
 
     // Format and display (keep this part the same for now)
     const formattedBalance = formatAmount(
-      appState.getState("data.balance"),
+      appState.getState("tracerData.balance"),
       decimals
     );
     const formattedTotalSupply = formatAmount(
-      appState.getState("data.totalSupply"),
+      appState.getState("tracertData.totalSupply"),
       decimals
     );
     const formattedVotingPower = formatAmount(
-      appState.getState("data.votingPower"),
+      appState.getState("tracerData.votingPower"),
       decimals
     );
 
@@ -71,7 +71,9 @@ export function updateUI() {
     document.getElementById(
       "totalSupply"
     ).textContent = `${formattedTotalSupply} ${symbol}`;
-    document.getElementById("nonce").textContent = nonce.toString();
+    document.getElementById("nonce").textContent = appState
+      .getState("tracertData.nonce")
+      .toString();
     document.getElementById(
       "votingPower"
     ).textContent = `${formattedVotingPower} ${symbol}`;
@@ -82,12 +84,12 @@ export function updateUI() {
     if (delegates === ethers.ZeroAddress) {
       displayDelegate = "No delegate set";
     } else if (
-      appState.getState("data.delegates").toLowerCase() ===
+      appState.getState("tracerData.delegates").toLowerCase() ===
       appState.getState("wallet.account").toLowerCase()
     ) {
       displayDelegate = "Self-delegated";
     } else {
-      displayDelegate = delegates;
+      displayDelegate = appState.getState("tracerData.delegates");
     }
     el.textContent = displayDelegate;
 
@@ -100,11 +102,11 @@ export function updateUI() {
     if (appState.getState("ui.isVestingMode")) {
       document.getElementById("vestingDestination").innerHTML = explorerLink(
         "address",
-        appState.getState("contracts.vestingOwner")
+        appState.getState("vestingData.owner")
       );
 
       const formattedUnvested = formatAmount(
-        appState.getState("data.unvestedBalance"),
+        appState.getState("vestingData.unvested"),
         decimals
       );
       document.getElementById(
@@ -112,7 +114,7 @@ export function updateUI() {
       ).textContent = `${formattedUnvested} ${symbol}`;
 
       const formattedRelease = formatAmount(
-        appState.getState("data.vestingReleased"),
+        appState.getState("vestingData.released"),
         decimals
       );
       document.getElementById(
@@ -120,7 +122,7 @@ export function updateUI() {
       ).textContent = `${formattedRelease} ${symbol}`;
 
       const formattedReleasable = formatAmount(
-        appState.getState("data.vestingReleasable"),
+        appState.getState("vestingData.releasable"),
         decimals
       );
       document.getElementById(
@@ -128,36 +130,31 @@ export function updateUI() {
       ).textContent = `${formattedReleasable} ${symbol}`;
 
       const formattedStart = toLocalFromSeconds(
-        Number(appState.getState("data.vestingStart"))
+        Number(appState.getState("vesting.start"))
       );
       document.getElementById("vestingStart").textContent = formattedStart;
 
       const formattedEnd = toLocalFromSeconds(
-        Number(appState.getState("data.vestingEnd"))
+        Number(appState.getState("vesting.end"))
       );
       document.getElementById("vestingEnd").textContent = formattedEnd;
 
       document.getElementById("vestingAddress").innerHTML = explorerLink(
         "address",
-        appState.getState("contracts.vestingAddress")
-      );
-      document.getElementById("vestingDestination").innerHTML = explorerLink(
-        "address",
-        appState.getState("contracts.VestingOwner")
+        appState.getState("vesting.address")
       );
 
       // Activate transfer owenership only if owner
       const isNotOwner =
         appState.getState("wallet.account") !=
-        appState.getState("contracts.vestingOwner");
+        appState.getState("vestingData.owner");
 
       document.getElementById("transferOwnershipBtn").disabled = isNotOwner;
       document.getElementById("ownerBadge").hidden = isNotOwner;
 
-      console.log("When updating ", appState.getState("data.vestingStarted"));
       // Disable Release button if vesting hasn't started.
       document.getElementById("releaseTokensBtn").disabled = !appState.getState(
-        "data.vestingStarted"
+        "vestingData.started"
       );
     }
   }
@@ -166,10 +163,10 @@ export function updateUI() {
 export function updateNetworkUI() {
   if (appState.getState("wallet.network")) {
     document.getElementById("network").textContent =
-      appState.getState("data.name");
+      appState.getState("tracer.name");
     document.getElementById("tracerAddress").innerHTML = explorerLink(
       "address",
-      appState.getState("contracts.tokenAddress")
+      appState.getState("tracer.address")
     );
 
     // Show/hide mainnet warning
@@ -179,7 +176,7 @@ export function updateNetworkUI() {
 
     if (
       isMainnet &&
-      appState.getState("contracts.tokenAddress") ===
+      appState.getState("tracer.address") ===
         "0x0000000000000000000000000000000000000000"
     ) {
       if (!warning) {

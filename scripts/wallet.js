@@ -13,12 +13,12 @@ export function detectNetwork(chainId) {
 
     // UPDATE state instead of global variables:
     appState.setState("wallet.network", currentNetwork);
-    appState.setState("contracts.tokenAddress", tracerAddress);
+    appState.setState("tracer.address", tracerAddress);
 
     return true;
   } else {
     appState.setState("wallet.network", null);
-    appState.setState("contracts.tokenAddress", null);
+    appState.setState("tracer.address", null);
     return false;
   }
 }
@@ -74,27 +74,41 @@ export async function connectWallet() {
 
     // Initialize contracts
     const tracerContract = getTokenContract(
-      appState.getState("contracts.tokenAddress"),
+      appState.getState("tracer.address"),
       signer
     );
-    appState.setState("contracts.token", tracerContract);
+    appState.setState("tracer.contract", tracerContract);
+
+    const [name, symbol, decimals] = await Promise.all([
+      tracerContract.name(),
+      tracerContract.symbol(),
+      tracerContract.decimals(),
+    ]);
+
+    appState.setState("tracer.name", name);
+    appState.setState("tracer.symbol", symbol);
+    appState.setState("tracer.decimals", decimals);
 
     if (appState.getState("ui.isVestingMode")) {
       const vestingContract = getVestingContract(
-        appState.getState("contracts.vestingAddress"),
+        appState.getState("vesting.address"),
         signer
       );
-      const vestingOwner = await vestingContract.owner();
-      appState.setState("contracts.vesting", vestingContract);
-      appState.setState("contracts.vestingOwner", vestingOwner);
+      appState.setState("vesting.contract", vestingContract);
+
+      const [vestingStart, vestingEnd] = await Promise.all([
+        vestingContract.start(),
+        vestingContract.end(),
+      ]);
+
+      appState.setState("vesting.start", vestingStart);
+      appState.setState("vesting.end", vestingEnd);
     }
 
     await refreshData();
-    updateUI();
-    updateNetworkUI();
 
     showMessage(
-      `Successfully connected to ${appState.getState("data.name")}!`,
+      `Successfully connected to ${appState.getState("tracer.name")}!`,
       "success"
     );
   } catch (error) {
@@ -116,59 +130,34 @@ export async function connectWallet() {
 }
 
 export async function refreshData() {
-  console.log("RefreshData");
-  const tracerContract = appState.getState("contracts.token");
+  const tracerContract = appState.getState("tracer.contract");
   const userAccount = appState.getState("wallet.account");
 
   if (!tracerContract || !userAccount) return;
 
   try {
-    const [
-      balance,
-      totalSupply,
-      nonce,
-      name,
-      symbol,
-      decimals,
-      votingPower,
-      delegates,
-    ] = await Promise.all([
-      tracerContract.balanceOf(userAccount),
-      tracerContract.totalSupply(),
-      tracerContract.nonces(userAccount),
-      tracerContract.name(),
-      tracerContract.symbol(),
-      tracerContract.decimals(),
-      tracerContract.getVotes(userAccount),
-      tracerContract.delegates(userAccount),
-    ]);
+    const [balance, totalSupply, nonce, votingPower, delegates] =
+      await Promise.all([
+        tracerContract.balanceOf(userAccount),
+        tracerContract.totalSupply(),
+        tracerContract.nonces(userAccount),
+        tracerContract.getVotes(userAccount),
+        tracerContract.delegates(userAccount),
+      ]);
 
-    appState.setState("data.balance", balance);
-    appState.setState("data.totalSupply", totalSupply);
-    appState.setState("data.nonce", nonce);
-    appState.setState("data.votingPower", votingPower);
-    appState.setState("data.delegates", delegates);
-    appState.setState("data.name", name);
-    appState.setState("data.symbol", symbol);
-    appState.setState("data.decimals", decimals);
+    appState.setState("tracerData.balance", balance);
+    appState.setState("tracertData.totalSupply", totalSupply);
+    appState.setState("tracertData.nonce", nonce);
+    appState.setState("tracerData.votingPower", votingPower);
+    appState.setState("tracerData.delegates", delegates);
 
     if (appState.getState("ui.isVestingMode")) {
-      const vestingContract = appState.getState("contracts.vesting");
-      const tokenAddr = appState.getState("contracts.tokenAddress");
-      const vestingAddr = appState.getState("contracts.vestingAddress");
+      const vestingContract = appState.getState("vesting.contract");
+      const tokenAddr = appState.getState("tracer.address");
+      const vestingAddr = appState.getState("vesting.address");
       const provider = appState.getState("wallet.provider");
 
-      const [
-        vestingStart,
-        vestingEnd,
-        released,
-        releasable,
-        owner,
-        balance,
-        now,
-      ] = await Promise.all([
-        vestingContract.start(),
-        vestingContract.end(),
+      const [released, releasable, owner, balance, now] = await Promise.all([
         vestingContract["released(address)"](tokenAddr),
         vestingContract["releasable(address)"](tokenAddr),
         vestingContract.owner(),
@@ -176,13 +165,12 @@ export async function refreshData() {
         provider.getBlock("latest"),
       ]);
 
-      appState.setState("data.vestingStart", vestingStart);
-      appState.setState("data.vestingEnd", vestingEnd);
-      appState.setState("data.vestingReleased", released);
-      appState.setState("data.vestingReleasable", releasable);
-      appState.setState("data.unvestedBalance", balance - releasable);
+      appState.setState("vestingData.released", released);
+      appState.setState("vestingData.releasable", releasable);
+      appState.setState("vestingData.unvested", balance - releasable);
+      appState.setState("vestingData.owner", owner);
       appState.setState(
-        "data.vestingStarted",
+        "vestingData.started",
         BigInt(now.timestamp) > vestingStart
       );
     }
@@ -192,22 +180,24 @@ export async function refreshData() {
     console.error("Refresh error:", error);
     showMessage(`Failed to refresh data: ${error.message}`, "error");
   }
+  updateUI();
+  updateNetworkUI();
 }
 
 export async function addToMetaMask() {
   try {
-    const symbol = appState.getState("data.symbol");
-    const decimals = appState.getState("data.decimals");
+    const symbol = appState.getState("tracer.symbol");
+    const decimals = appState.getState("tracer.decimals");
     const tokenImageURL =
       "https://tracer.endglobalwarming.net/assets/tracerroundicon.svg";
     console.log(symbol, ", ", decimals, ", ", tokenImageURL);
-    console.log(appState.getState("contracts.tokenAddress"));
+    console.log(appState.getState("tracer.address"));
     await window.ethereum.request({
       method: "wallet_watchAsset",
       params: {
         type: "ERC20",
         options: {
-          address: appState.getState("contracts.tokenAddress"),
+          address: appState.getState("tracer.address"),
           symbol: symbol.toString(),
           decimals: Number(decimals),
           image: tokenImageURL,
