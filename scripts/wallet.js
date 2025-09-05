@@ -146,8 +146,8 @@ export async function refreshData() {
       ]);
 
     appState.setState("tracerData.balance", balance);
-    appState.setState("tracertData.totalSupply", totalSupply);
-    appState.setState("tracertData.nonce", nonce);
+    appState.setState("tracerData.totalSupply", totalSupply);
+    appState.setState("tracerData.nonce", nonce);
     appState.setState("tracerData.votingPower", votingPower);
     appState.setState("tracerData.delegates", delegates);
 
