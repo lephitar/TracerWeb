@@ -44,6 +44,9 @@ if (typeof window.ethereum !== "undefined") {
       }
     });
 
+    appState.setState("tracer.contract", null);
+    appState.setState("vesting.contract", null);
+
     window.ethereum.on("chainChanged", function (chainId) {
       // Detect new network and reconnect
       requestAnimationFrame(async () => {
