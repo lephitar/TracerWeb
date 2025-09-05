@@ -171,7 +171,7 @@ export async function refreshData() {
       appState.setState("vestingData.owner", owner);
       appState.setState(
         "vestingData.started",
-        BigInt(now.timestamp) > vestingStart
+        BigInt(now.timestamp) > appState.getState("vesting.start")
       );
     }
 
