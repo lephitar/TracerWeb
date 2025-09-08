@@ -327,7 +327,6 @@
             background: transparent;
             padding: 0;
             box-shadow: none;
-            transition: none;
         }
 
         .info-card.flip-enabled:hover,
@@ -396,8 +395,8 @@
         /* Help button styling */
         .help-button {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 24px;
+            right: 24px;
             width: 24px;
             height: 24px;
             border-radius: 50%;
@@ -429,8 +428,8 @@
         /* Close button on the back */
         .close-button {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 24px;
+            right: 24px;
             width: 24px;
             height: 24px;
             border-radius: 50%;
