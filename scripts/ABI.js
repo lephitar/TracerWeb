@@ -11,6 +11,10 @@ export const TOKEN_ABI = [
   "function approve(address spender, uint256 amount) returns (bool)",
   "function transferFrom(address from, address to, uint256 amount) returns (bool)",
 
+  // ERC20Burnable extensions
+  "function burn(uint256 amount)",
+  "function burnFrom(address account, uint256 amount)",
+
   // ERC20Permit
   "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
   "function nonces(address owner) view returns (uint256)",
