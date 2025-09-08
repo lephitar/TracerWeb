@@ -91,6 +91,18 @@ window.addEventListener("load", async function () {
   }
 });
 
+// Single listener on document handles ALL flip cards
+document.addEventListener("click", function (event) {
+  if (
+    event.target.classList.contains("help-button") ||
+    event.target.classList.contains("close-button")
+  ) {
+    // Works for both info-cards AND transaction-sections
+    const card = event.target.closest(".flip-enabled");
+    if (card) card.classList.toggle("flipped");
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const on = (id, handler) => {
     document.getElementById(id)?.addEventListener("click", (e) => {

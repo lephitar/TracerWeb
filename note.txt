@@ -1,0 +1,61 @@
+npx serve .
+
+filemerge tool
+
+
+Tracer Token Contract
+Tracer token (TRCR) contract address for the selected network.
+
+Connected Wallet
+Not Connected
+The wallet address currently set in Metamask.
+
+Network
+Auto-detect from MetaMask
+The blockchain network currently selected in your wallet.
+
+Total Supply
+0 TRCR
+Total TRCR tokens excluding burnt ones, including both circulating tokens and those locked in vesting contracts.
+
+Your Balance
+0.0 TRCR
+Transferable TRCR tokens available in your wallet.
+
+Permit Counter
+0
+A security counter that increments with each permit signature you create. This prevents replay attacks and ensures each permit is unique.
+Auto-incrementing security counter that prevents replay attacks by ensuring each permit signature is unique.
+
+Your Voting Power
+0.0 TRCR
+Your total voting weight in Tracer DAO, including self-delegated tokens and those delegated to you.
+
+Voting Power Holder
+Loading...
+Address controlling the current voting power for your balance of TRCR tokens.
+
+Vesting contract
+Vesting contract address indicated in the URL.
+
+Vesting Destination
+Loading...
+Wallet address receiving the vested tokens.
+
+Unvested
+0.0
+TRCR Tokens not yet released according to the vesting schedule.
+
+Released already
+TRCR tokens already released from vesting.
+
+Releasable
+TRCR Tokens currently available for release based on vesting schedule.
+
+Start date
+Scheduled vesting start date.
+
+End date
+Vesting completion date.
+
+

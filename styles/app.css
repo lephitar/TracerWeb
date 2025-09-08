@@ -8,6 +8,8 @@
             --text-light: #718096;
             --card-bg: #ffffff;
             --shadow: rgba(44, 89, 251, 0.1);
+            --gray: #839791;
+            --light-gray: #C6CDCB;
         }
 
         * {
@@ -71,7 +73,6 @@
             font-size: 14px;
         }
 
-
         .status {
             padding: 16px 24px;
             border-radius: 50px;
@@ -97,7 +98,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .info-card {
@@ -309,4 +310,196 @@
 
         .badge[hidden] {
             display: none !important;
+        }
+
+
+
+
+
+        /* ============ FLIP CARD HELP SYSTEM ============ */
+
+        /* Transform existing cards into flip containers */
+        .info-card.flip-enabled,
+        .transaction-section.flip-enabled {
+            perspective: 1000px;
+            height: auto;
+            min-height: 140px;
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            transition: none;
+        }
+
+        .info-card.flip-enabled:hover,
+        .transaction-section.flip-enabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            height: auto;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .flip-enabled.flipped .flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-front,
+        .flip-back {
+            position: absolute;
+            width: 100%;
+            height: auto;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px var(--shadow);
+        }
+
+        .flip-front {
+            background: var(--card-bg);
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flip-front:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px var(--shadow);
+        }
+
+        .flip-back {
+            background: linear-gradient(135deg, var(--primary-blue), #1e40af);
+            color: white;
+            transform: rotateY(180deg);
+            padding: 24px;
+            display: flex;
+            align-items: left;
+            justify-content: left;
+        }
+
+        /* Transaction section specific styling */
+        .transaction-section.flip-enabled .flip-front {
+            padding: 32px;
+            /*             min-height: 300px;
+ */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-section.flip-enabled .flip-back {
+            padding: 32px;
+        }
+
+        /* Help button styling */
+        .help-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--light-gray);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px -var(--gray);
+            z-index: 10;
+            padding: 0;
+            min-height: unset;
+        }
+
+        .help-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(44, 89, 251, 0.4);
+        }
+
+        .help-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Close button on the back */
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            padding: 0;
+            min-height: unset;
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .close-button:active {
+            transform: scale(0.95);
+        }
+
+        .help-content {
+            font-size: 13px;
+            line-height: 1.5;
+            font-weight: 400;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .help-content h4 {
+            /*             margin: 0 0 12px 0;
+ */
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            font-family: 'Comfortaa', sans-serif;
+            margin-top: 0;
+        }
+
+        /* Pulse animation for help buttons */
+        @keyframes helpPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 12px rgba(44, 89, 251, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 4px 12px rgba(44, 89, 251, 0.6);
+            }
+        }
+
+        .help-button {
+            animation: helpPulse 3s ease-in-out infinite;
+        }
+
+        .help-button:hover {
+            animation: none;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .flip-inner {
+                transition: transform 0.6s ease;
+            }
         }

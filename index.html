@@ -34,95 +34,442 @@
         </div>
 
         <div class="info-grid">
-            <div class="info-card">
+            <!--             <div class="info-card">
                 <h3>Tracer Token Contract</h3>
                 <div class="contract-info" id="tracerAddress">
                     0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef</div>
             </div>
-
-            <div class="info-card">
-                <h3>Connected Wallet <span id="ownerBadge" class="badge" hidden>Owner</span>
-
-                </h3>
-                <div class="contract-info" id="userAddress">Not Connected</div>
+ -->
+            <div class="info-card flip-enabled" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Tracer Token Contract</h3>
+                        <div class="contract-info" id="tracerAddress">
+                            0x23fd096B2875A6dEccae8C688f44fAf0001E3Eef</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Tracer Token Contract</h4>
+                            <p>Tracer token (TRCR) contract address for the selected network.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="info-card show-vesting">
+            <!--             <div class="info-card">
+                <h3>Connected Wallet <span id="ownerBadge" class="badge" hidden>Owner</span></h3>
+                <div class="contract-info" id="userAddress">Not Connected</div>
+            </div>
+ -->
+            <div class="info-card flip-enabled" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Connected Wallet <span id="ownerBadge" class="badge" hidden>Owner</span></h3>
+                        <div class="contract-info" id="userAddress">Not Connected</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Connected Wallet</h4>
+                            <p>The wallet address currently set in Metamask.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
+
+            <!--             <div class="info-card show-vesting">
                 <h3>Vesting Contract</h3>
                 <div class="contract-info" id="vestingAddress">Loading...</div>
             </div>
-
-            <div class="info-card show-vesting">
-                <h3>Vesting Destination</h3>
-                <div class="contract-info" id="vestingDestination">Loading...</div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Vesting Contract</h3>
+                        <div class="contract-info" id="vestingAddress">Loading...</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Vesting Contract</h4>
+                            <p>Vesting contract address indicated in the URL.
+                            </p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="info-card">
+            <!--             <div class="info-card show-vesting">
+                <h3>Vesting Contract</h3>
+                <div class="contract-info" id="vestingDestination">Loading...</div>
+            </div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Vesting Destination</h3>
+                        <div class="contract-info" id="vestingDestination">Loading...</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Vesting Destination</h4>
+                            <p>Wallet address receiving the vested tokens.
+                            </p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--             <div class="info-card">
                 <h3>Network</h3>
                 <div id="network">Auto-detect from MetaMask</div>
             </div>
+ -->
+            <div class="info-card flip-enabled" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Network</h3>
+                        <div id="network">Auto-detect from MetaMask</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Network</h4>
+                            <p>The blockchain network currently selected in your wallet.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-default">
+            <!--             <div class="info-card show-default">
                 <h3>Total Supply</h3>
                 <div id="totalSupply">Loading...</div>
                 <div id="symbol"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-default" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Total Supply</h3>
+                        <div class="contract-info" id="totalSupply">0 TRCR</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Total Supply</h4>
+                            <p>Total TRCR tokens excluding burnt ones, including both circulating tokens and those
+                                locked in vesting contracts.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-default">
+            <!--             <div class="info-card show-default">
                 <h3>Your Balance</h3>
                 <div id="balance"></div>
                 <div id="symbol"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-default" id="card-balance">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Your Balance</h3>
+                        <div class="contract-info" id="balance">0.0 TRCR</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Your Balance</h4>
+                            <p>Transferable TRCR tokens available in your wallet.
+                            </p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-default">
+
+            <!--             <div class="info-card show-default">
                 <h3>Permit Counter</h3>
                 <div id="nonce"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-default" id="card-permit">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Permit Counter</h3>
+                        <div class="contract-info" id="nonce">0</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Permit Counter</h4>
+                            <p>Auto-incrementing security counter that prevents replay attacks by ensuring each permit
+                                signature is unique.
+                            </p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-default">
+            <!--             <div class="info-card show-default">
                 <h3>Your Voting Power</h3>
                 <div id="votingPower">Loading...</div>
                 <div id="symbol"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-default" id="card-voting-power">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Your Voting Power</h3>
+                        <div class="contract-info" id="votingPower">0.0 TRCR</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Voting Power</h4>
+                            <p>Your total voting weight in Tracer DAO, including self-delegated tokens and those
+                                delegated to you.</p>
+                        </div>
+                        <button class="close-button" onclick="flipCard('card-voting-power')">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-default">
+            <!--             <div class="info-card show-default">
                 <h3>Voting Power Holder</h3>
                 <div id="delegates">Loading...</div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-default" id="card-voting-power">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Voting Power Holder</h3>
+                        <div id="delegates">Loading...</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Voting Power Holder</h4>
+                            <p>Address controlling the current voting power for your balance of TRCR tokens.
+                            </p>
+                        </div>
+                        <button class="close-button" onclick="flipCard('card-voting-power')">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-vesting">
+            <!--             <div class="info-card show-vesting">
                 <h3>Unvested</h3>
                 <div id="unvestedBalance"></div>
                 <div id="symbol"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Unvested</h3>
+                        <div id="unvestedBalance">0.0</div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Unvested</h4>
+                            <p>TRCR Tokens not yet released according to the vesting schedule.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-vesting">
+            <!--             <div class="info-card show-vesting">
                 <h3>Released already</h3>
                 <div id="releasedVesting"></div>
                 <div id="symbol"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Released already</h3>
+                        <div id="releasedVesting"></div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Released already</h4>
+                            <p>TRCR tokens already released from vesting.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-vesting">
+            <!--             <div class="info-card show-vesting">
                 <h3>Releasable</h3>
                 <div id="releasableVesting"></div>
                 <div id="symbol"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Releasable</h3>
+                        <div id="releasableVesting"></div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Releasable</h4>
+                            <p>TRCR Tokens currently available for release based on vesting schedule.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-vesting">
+            <!--             <div class="info-card show-vesting">
                 <h3>Start date</h3>
                 <div id="vestingStart"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>Start date</h3>
+                        <div id="vestingStart"></div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>Start date</h4>
+                            <p>Scheduled vesting start date.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
 
-            <div class="info-card show-vesting">
+            <!--             <div class="info-card show-vesting">
                 <h3>End date</h3>
                 <div id="vestingEnd"></div>
             </div>
+ -->
+            <div class="info-card flip-enabled show-vesting" id="card-total-supply">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <h3>End date</h3>
+                        <div id="vestingEnd"></div>
+                        <button class="help-button">?</button>
+                    </div>
+                    <div class="flip-back">
+                        <div class="help-content">
+                            <h4>End date</h4>
+                            <p>Vesting completion date.</p>
+                        </div>
+                        <button class="close-button">×</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="actions">
             <button id="connectBtn">Connect MetaMask</button>
             <button id="refreshBtn" disabled>Refresh Data</button>
             <button disabled id="addTokenBtn">Add Tracer to MetaMask</button>
+        </div>
+
+        <div class="transaction-section flip-enabled show-default" id="section-transfer">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Transfer Tokens</h3>
+                    <div class="input-group">
+                        <label for="transferTo">Recipient Address:</label>
+                        <input type="text" id="transferTo" placeholder="0x..." />
+                    </div>
+                    <div class="input-group">
+                        <label for="transferAmount">Amount (TRCR):</label>
+                        <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
+                    </div>
+                    <button disabled id="transferTokensBtn">Transfer</button>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>💸 Transfer Tokens</h4>
+                        <p>Send TRCR tokens directly to another wallet address. Always double-check the recipient
+                            address as blockchain transactions cannot be reversed.</p>
+                        <br>
+                        <p><strong>Important:</strong> Make sure you have enough ETH for gas fees and verify the
+                            address is correct before confirming.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="transaction-section flip-enabled show-default" id="section-approve">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Approve Allowance</h3>
+                    <div class="input-group">
+                        <label for="approveSpender">Spender Address:</label>
+                        <input type="text" id="approveSpender" placeholder="0x..." />
+                    </div>
+                    <div class="input-group">
+                        <label for="approveAmount">Amount (TRCR):</label>
+                        <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
+                    </div>
+                    <button disabled id="approveTokensBtn">Approve</button>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Approve Allowance</h4>
+                        <p>Allow another address or smart contract to spend a specific amount of your TRCR tokens on
+                            your behalf. This is required for DEX trading and DeFi interactions.</p>
+                        <br>
+                        <p><strong>💡 Tip:</strong> Only approve the amount you intend to use for better security.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="transaction-section flip-enabled show-default" id="section-delegate">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Delegate Voting Power</h3>
+                    <div class="input-group">
+                        <label for="delegateAddress">Delegatee Address:</label>
+                        <input type="text" id="delegateAddress" placeholder="0x... (leave empty to delegate to self)" />
+                    </div>
+                    <button disabled id="delegateVotingPowerBtn">Delegate Voting Power</button>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>🗳️ Delegate Voting Power</h4>
+                        <p>Assign your voting rights to another address for governance decisions. Leave the field empty
+                            to delegate to yourself and activate your own voting power.</p>
+                        <br>
+                        <p><strong>Note:</strong> You must delegate (even to yourself) before your tokens can be used
+                            for voting.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
         </div>
 
         <div class="transaction-section show-default">
