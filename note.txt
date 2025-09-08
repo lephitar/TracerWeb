@@ -4,11 +4,11 @@ filemerge tool
 
 
 Tracer Token Contract
-Tracer token (TRCR) contract address for the selected network.
+The address of the TRCR smart contract on the currently selected arbitrum blockchain network.
 
 Connected Wallet
 Not Connected
-The wallet address currently set in Metamask.
+The wallet address currently connected via MetaMask.
 
 Network
 Auto-detect from MetaMask
@@ -24,8 +24,7 @@ Transferable TRCR tokens available in your wallet.
 
 Permit Counter
 0
-A security counter that increments with each permit signature you create. This prevents replay attacks and ensures each permit is unique.
-Auto-incrementing security counter that prevents replay attacks by ensuring each permit signature is unique.
+A security counter used for EIP-2612 permits. It increments with each signed permit, ensuring signatures cannot be reused in replay attacks.
 
 Your Voting Power
 0.0 TRCR
@@ -33,29 +32,62 @@ Your total voting weight in Tracer DAO, including self-delegated tokens and thos
 
 Voting Power Holder
 Loading...
-Address controlling the current voting power for your balance of TRCR tokens.
+The address currently holding voting power for your tokens (may be you or a delegate).
 
 Vesting contract
-Vesting contract address indicated in the URL.
+The address of the smart contract handling vesting, displayed from the URL.
 
 Vesting Destination
 Loading...
-Wallet address receiving the vested tokens.
+Address of the wallet receiving the vested tokens.
 
 Unvested
 0.0
-TRCR Tokens not yet released according to the vesting schedule.
+TRCR tokens not yet unlocked by the vesting schedule.
 
 Released already
-TRCR tokens already released from vesting.
+TRCR tokens already released from the vesting contract.
 
 Releasable
-TRCR Tokens currently available for release based on vesting schedule.
+Tokens currently available for release (you can claim these now).
 
 Start date
-Scheduled vesting start date.
+The scheduled vesting start date.
 
 End date
-Vesting completion date.
+The scheduled vesting completion date.
 
 
+Transfer Tokens
+Send TRCR tokens directly to another wallet address. 
+                        <p><strong>⚠️ Important:</strong> Always double-check the recipient address as blockchain transactions cannot be reversed.</p>
+                        <p><strong>💡 Tip:</strong> You’ll need ETH (or the chain’s native token) to pay gas fees.</p>
+
+Approve Allowance
+Authorize another address or contract (e.g., a DEX) to spend your TRCR on your behalf.
+<strong>💡 Tip:</strong> Only approve the amount you intend to use for better security.
+
+Check Allowance
+
+Permit via Signature
+
+
+Check Voting Power
+Assign your voting rights to another address for governance decisions. Leave the field empty to delegate to yourself and activate your own voting power.
+<strong>Note:</strong> You must delegate (even to yourself) before your tokens can be used for voting.
+
+Delegate voting power
+Assign your voting rights to another address for governance decisions. Leave the field empty to delegate to yourself and activate your own voting power.
+<strong>Note:</strong> You must delegate (even to yourself) before your tokens can be used
+                            for voting.
+
+
+Circulation Check
+Circulation is the amount of TRCR tokens not locked in a vesting contract at the selected date.
+
+
+Release Tokens
+Releasing vested tokens are transferred to the owner's wallet
+
+Transfer Ownership
+Transferring ownership of vesting contract also changes the beneficiary of the vesting contract to the new owner.

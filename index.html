@@ -51,7 +51,8 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Tracer Token Contract</h4>
-                            <p>Tracer token (TRCR) contract address for the selected network.</p>
+                            <p>The address of the TRCR smart contract on the currently selected arbitrum blockchain
+                                network.</p>
                         </div>
                         <button class="close-button">×</button>
                     </div>
@@ -73,7 +74,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Connected Wallet</h4>
-                            <p>The wallet address currently set in Metamask.</p>
+                            <p>The wallet address currently connected via MetaMask.</p>
                         </div>
                         <button class="close-button">×</button>
                     </div>
@@ -95,7 +96,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Vesting Contract</h4>
-                            <p>Vesting contract address indicated in the URL.
+                            <p>The address of the smart contract handling vesting, displayed from the URL.
                             </p>
                         </div>
                         <button class="close-button">×</button>
@@ -118,7 +119,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Vesting Destination</h4>
-                            <p>Wallet address receiving the vested tokens.
+                            <p>Address of the wallet receiving the vested tokens.
                             </p>
                         </div>
                         <button class="close-button">×</button>
@@ -213,8 +214,8 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Permit Counter</h4>
-                            <p>Auto-incrementing security counter that prevents replay attacks by ensuring each permit
-                                signature is unique.
+                            <p>A security counter used for EIP-2612 permits. It increments with each signed permit,
+                                ensuring signatures cannot be reused in replay attacks.
                             </p>
                         </div>
                         <button class="close-button">×</button>
@@ -261,7 +262,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Voting Power Holder</h4>
-                            <p>Address controlling the current voting power for your balance of TRCR tokens.
+                            <p>The address currently holding voting power for your tokens (may be you or a delegate).
                             </p>
                         </div>
                         <button class="close-button" onclick="flipCard('card-voting-power')">×</button>
@@ -285,7 +286,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Unvested</h4>
-                            <p>TRCR Tokens not yet released according to the vesting schedule.</p>
+                            <p>TRCR tokens not yet unlocked by the vesting schedule.</p>
                         </div>
                         <button class="close-button">×</button>
                     </div>
@@ -308,7 +309,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Released already</h4>
-                            <p>TRCR tokens already released from vesting.</p>
+                            <p>TRCR tokens already released from the vesting contract.</p>
                         </div>
                         <button class="close-button">×</button>
                     </div>
@@ -331,7 +332,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>Releasable</h4>
-                            <p>TRCR Tokens currently available for release based on vesting schedule.</p>
+                            <p>Tokens currently available for release (you can claim these now).</p>
                         </div>
                         <button class="close-button">×</button>
                     </div>
@@ -375,7 +376,7 @@
                     <div class="flip-back">
                         <div class="help-content">
                             <h4>End date</h4>
-                            <p>Vesting completion date.</p>
+                            <p>The scheduled vesting completion date.</p>
                         </div>
                         <button class="close-button">×</button>
                     </div>
@@ -390,6 +391,20 @@
             <button disabled id="addTokenBtn">Add Tracer to MetaMask</button>
         </div>
 
+        <!--         <div class="transaction-section show-default">
+            <h3>Transfer Tokens</h3>
+            <div class="input-group">
+                <label for="transferTo">Recipient Address:</label>
+                <input type="text" id="transferTo" placeholder="0x..." />
+            </div>
+            <div class="input-group">
+                <label for="transferAmount">Amount (TRCR):</label>
+                <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
+            </div>
+            <button disabled id="transferTokensBtn">Transfer</button>
+            <div id="transferTokensResult"></div>
+        </div>
+ -->
         <div class="transaction-section flip-enabled show-default" id="section-transfer">
             <div class="flip-inner">
                 <div class="flip-front">
@@ -403,104 +418,25 @@
                         <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
                     </div>
                     <button disabled id="transferTokensBtn">Transfer</button>
+                    <div id="transferTokensResult"></div>
                     <button class="help-button">?</button>
                 </div>
                 <div class="flip-back">
                     <div class="help-content">
-                        <h4>💸 Transfer Tokens</h4>
-                        <p>Send TRCR tokens directly to another wallet address. Always double-check the recipient
-                            address as blockchain transactions cannot be reversed.</p>
+                        <h4>Transfer Tokens</h4>
+                        <p>Send TRCR tokens directly to another wallet address. </p>
                         <br>
-                        <p><strong>Important:</strong> Make sure you have enough ETH for gas fees and verify the
-                            address is correct before confirming.</p>
+                        <p><strong>⚠️ Important:</strong> Always double-check the recipient address as blockchain
+                            transactions
+                            cannot be reversed.</p>
+                        <p><strong>💡 Tip:</strong> You’ll need ETH (or the chain’s native token) to pay gas fees.</p>
                     </div>
                     <button class="close-button">×</button>
                 </div>
             </div>
         </div>
 
-        <div class="transaction-section flip-enabled show-default" id="section-approve">
-            <div class="flip-inner">
-                <div class="flip-front">
-                    <h3>Approve Allowance</h3>
-                    <div class="input-group">
-                        <label for="approveSpender">Spender Address:</label>
-                        <input type="text" id="approveSpender" placeholder="0x..." />
-                    </div>
-                    <div class="input-group">
-                        <label for="approveAmount">Amount (TRCR):</label>
-                        <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
-                    </div>
-                    <button disabled id="approveTokensBtn">Approve</button>
-                    <button class="help-button">?</button>
-                </div>
-                <div class="flip-back">
-                    <div class="help-content">
-                        <h4>Approve Allowance</h4>
-                        <p>Allow another address or smart contract to spend a specific amount of your TRCR tokens on
-                            your behalf. This is required for DEX trading and DeFi interactions.</p>
-                        <br>
-                        <p><strong>💡 Tip:</strong> Only approve the amount you intend to use for better security.</p>
-                    </div>
-                    <button class="close-button">×</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="transaction-section flip-enabled show-default" id="section-delegate">
-            <div class="flip-inner">
-                <div class="flip-front">
-                    <h3>Delegate Voting Power</h3>
-                    <div class="input-group">
-                        <label for="delegateAddress">Delegatee Address:</label>
-                        <input type="text" id="delegateAddress" placeholder="0x... (leave empty to delegate to self)" />
-                    </div>
-                    <button disabled id="delegateVotingPowerBtn">Delegate Voting Power</button>
-                    <button class="help-button">?</button>
-                </div>
-                <div class="flip-back">
-                    <div class="help-content">
-                        <h4>🗳️ Delegate Voting Power</h4>
-                        <p>Assign your voting rights to another address for governance decisions. Leave the field empty
-                            to delegate to yourself and activate your own voting power.</p>
-                        <br>
-                        <p><strong>Note:</strong> You must delegate (even to yourself) before your tokens can be used
-                            for voting.</p>
-                    </div>
-                    <button class="close-button">×</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="transaction-section show-default">
-            <h3>Transfer Tokens</h3>
-            <div class="input-group">
-                <label for="transferTo">Recipient Address:</label>
-                <input type="text" id="transferTo" placeholder="0x..." />
-            </div>
-            <div class="input-group">
-                <label for="transferAmount">Amount (TRCR):</label>
-                <input type="number" id="transferAmount" placeholder="0.0" step="0.000000000000000001" />
-            </div>
-            <button disabled id="transferTokensBtn">Transfer</button>
-            <div id="transferTokensResult"></div>
-        </div>
-
-        <div class="transaction-section show-default">
-            <h3>Approve Allowance</h3>
-            <div class="input-group">
-                <label for="approveSpender">Spender Address:</label>
-                <input type="text" id="approveSpender" placeholder="0x..." />
-            </div>
-            <div class="input-group">
-                <label for="approveAmount">Amount (TRCR):</label>
-                <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
-            </div>
-            <button disabled id="approveTokensBtn">Approve</button>
-            <div id="approveTokensResult"></div>
-        </div>
-
-        <div class="transaction-section show-default">
+        <!--         <div class="transaction-section show-default">
             <h3>Check Allowance</h3>
             <div class="input-group">
                 <label for="allowanceOwner">Owner Address:</label>
@@ -514,7 +450,79 @@
             <div id="checkAllowanceResult"></div>
         </div>
 
-        <div class="transaction-section show-default">
+ -->
+        <div class="transaction-section flip-enabled show-default" id="section-check-allowance">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Check Allowance</h3>
+                    <div class="input-group">
+                        <label for="allowanceOwner">Owner Address:</label>
+                        <input type="text" id="allowanceOwner" placeholder="0x... (leave empty for your address)" />
+                    </div>
+                    <div class="input-group">
+                        <label for="allowanceSpender">Spender Address:</label>
+                        <input type="text" id="allowanceSpender" placeholder="0x..." />
+                    </div>
+                    <button disabled id="checkAllowanceBtn">Check Allowance</button>
+                    <div id="checkAllowanceResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Check Allowance</h4>
+                        <p>View the amount of TRCR you’ve approved for a specific address or smart contract.
+                        </p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
+
+        <!--         <div class="transaction-section show-default">
+            <h3>Approve Allowance</h3>
+            <div class="input-group">
+                <label for="approveSpender">Spender Address:</label>
+                <input type="text" id="approveSpender" placeholder="0x..." />
+            </div>
+            <div class="input-group">
+                <label for="approveAmount">Amount (TRCR):</label>
+                <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
+            </div>
+            <button disabled id="approveTokensBtn">Approve</button>
+            <div id="approveTokensResult"></div>
+        </div>
+ -->
+
+        <div class="transaction-section flip-enabled show-default" id="section-approve-allowance">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Approve Allowance</h3>
+                    <div class="input-group">
+                        <label for="approveSpender">Spender Address:</label>
+                        <input type="text" id="approveSpender" placeholder="0x..." />
+                    </div>
+                    <div class="input-group">
+                        <label for="approveAmount">Amount (TRCR):</label>
+                        <input type="number" id="approveAmount" placeholder="0.0" step="0.000000000000000001" />
+                    </div>
+                    <button disabled id="approveTokensBtn">Approve</button>
+                    <div id="approveTokensResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Approve Allowance</h4>
+                        <p>Authorize another address or contract (e.g., a DEX) to spend your TRCR on your behalf.
+                        </p>
+                        <br>
+                        <p><strong>💡 Tip:</strong> Only approve the amount you intend to use for better security.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
+
+        <!--         <div class="transaction-section show-default">
             <h3>Permit via Signature</h3>
             <div class="input-group">
                 <label for="permitSpenderAddress">Permit Spender:</label>
@@ -531,8 +539,40 @@
             <button disabled id="signAndSubmitPermitBtn">Sign & Submit</button>
             <div id="signAndSubmitPermitResult"></div>
         </div>
+ -->
+        <div class="transaction-section flip-enabled show-default" id="section-permit-signature">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Permit via Signature</h3>
+                    <div class="input-group">
+                        <label for="permitSpenderAddress">Permit Spender:</label>
+                        <input type="text" id="permitSpenderAddress" placeholder="0x..." />
+                    </div>
+                    <div class="input-group">
+                        <label for="permitAmount">Amount (TRCR):</label>
+                        <input type="text" id="permitAmount" placeholder="0.0" />
+                    </div>
+                    <div class="input-group">
+                        <label for="deadlineStr">Deadline (local time):</label>
+                        <input type="datetime-local" id="deadlineStr" />
+                    </div>
+                    <button disabled id="signAndSubmitPermitBtn">Sign & Submit</button>
+                    <div id="signAndSubmitPermitResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Permit via Signature</h4>
+                        <p>Sign a message (EIP-2612 permit) to approve token spending without sending a transaction.</p>
+                        <br>
+                        <p><strong>💡 Tip:</strong> Saves gas fees by avoiding an on-chain approval transaction.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
 
-        <div class="transaction-section show-default">
+        <!--         <div class="transaction-section show-default">
             <h3>Check Voting Power</h3>
             <div class="input-group">
                 <label for="votingPowerAddress">Address:</label>
@@ -541,8 +581,31 @@
             <button disabled id="checkVotingPowerBtn">Check Voting Power</button>
             <div id="checkVotingPowerResult"></div>
         </div>
+ -->
+        <div class="transaction-section flip-enabled show-default" id="section-check-voting">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Check Voting Power</h3>
+                    <div class="input-group">
+                        <label for="votingPowerAddress">Address:</label>
+                        <input type="text" id="votingPowerAddress" placeholder="0x... (leave empty for your address)" />
+                    </div>
+                    <button disabled id="checkVotingPowerBtn">Check Voting Power</button>
+                    <div id="checkVotingPowerResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Check Allowance</h4>
+                        <p>View your current voting power for DAO proposals.
+                        </p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
 
-        <div class="transaction-section show-default">
+        <!--         <div class="transaction-section show-default">
             <h3>Delegate Voting Power</h3>
             <div class="input-group">
                 <label for="delegateAddress">Delegatee Address:</label>
@@ -551,8 +614,34 @@
             <button disabled id="delegateVotingPowerBtn">Delegate Voting Power</button>
             <div id="delegateVotingPowerResult"></div>
         </div>
+ -->
+        <div class="transaction-section flip-enabled show-default" id="section-delegate">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Delegate Voting Power</h3>
+                    <div class="input-group">
+                        <label for="delegateAddress">Delegatee Address:</label>
+                        <input type="text" id="delegateAddress" placeholder="0x... (leave empty to delegate to self)" />
+                    </div>
+                    <button disabled id="delegateVotingPowerBtn">Delegate Voting Power</button>
+                    <div id="delegateVotingPowerResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Delegate Voting Power</h4>
+                        <p>Assign your voting rights to another address for governance decisions. Leave the field empty
+                            to delegate to yourself and activate your own voting power.</p>
+                        <br>
+                        <p><strong>⚠️ Note:</strong> You must delegate (even to yourself) before your tokens can be used
+                            for voting.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
 
-        <div class="transaction-section show-default">
+        <!--         <div class="transaction-section show-default">
             <h3>Circulation Check</h3>
             <div class="input-group">
                 <label for="circulationTime">Max Possible Circulation at:</label>
@@ -561,15 +650,57 @@
             <button disabled id="circulationBtn">Check</button>
             <div id="circulationResult"></div>
         </div>
+ -->
+        <div class="transaction-section flip-enabled show-default" id="section-circulation">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Circulation Check</h3>
+                    <div class="input-group">
+                        <label for="circulationTime">Max Possible Circulation at:</label>
+                        <input type="datetime-local" id="circulationTime" />
+                    </div>
+                    <button disabled id="circulationBtn">Check</button>
+                    <div id="circulationResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Circulation Check</h4>
+                        <p>Check how many TRCR tokens were circulating (not locked in vesting) at a selected date.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
 
-        <div class="transaction-section show-vesting">
+        <!--         <div class="transaction-section show-vesting">
             <h3>Release Tokens</h3>
             <p>Release vested tokens to the beneficiary address.</p>
             <button disabled id="releaseTokensBtn">Release Available Tokens</button>
             <div id="releaseTokensResult"></div>
         </div>
+ -->
+        <div class="transaction-section flip-enabled show-vesting" id="section-release">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Release Tokens</h3>
+                    <p>Release vested tokens to the beneficiary address.</p>
+                    <button disabled id="releaseTokensBtn">Release Available Tokens</button>
+                    <div id="releaseTokensResult"></div>
+                    <button class="help-button">?</button>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Release Tokens</h4>
+                        <p>Withdraw vested TRCR tokens. These tokens will be transferred from the vesting contract to
+                            the owner's wallet.</p>
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+        </div>
 
-        <div class="transaction-section show-vesting">
+        <!--         <div class="transaction-section show-vesting">
             <h3>Transfer Ownership</h3>
             <div class="input-group">
                 <label for="newOwner">New Owner Address:</label>
@@ -577,6 +708,31 @@
             </div>
             <button disabled id="transferOwnershipBtn">Transfer Ownership</button>
             <div id="transferOwnershipResult"></div>
+        </div>
+ -->
+        <div class="transaction-section flip-enabled show-vesting" id="section-release">
+            <div class="flip-inner">
+                <div class="flip-front">
+                    <h3>Transfer Ownership</h3>
+                    <div class="input-group">
+                        <label for="newOwner">New Owner Address:</label>
+                        <input type="text" id="newOwner" placeholder="0x..." />
+                    </div>
+                    <button disabled id="transferOwnershipBtn">Transfer Ownership</button>
+                    <div id="transferOwnershipResult"></div>
+                </div>
+                <div class="flip-back">
+                    <div class="help-content">
+                        <h4>Transfer Ownership</h4>
+                        <p>Transfer ownership of the vesting contract to another address.</p>
+                        <br>
+                        <p><strong>⚠️ Important:</strong> This also changes the beneficiary of the vesting contract —
+                            the new owner becomes the recipient of future vested tokens.</p>
+
+                    </div>
+                    <button class="close-button">×</button>
+                </div>
+            </div>
         </div>
 
         <div id="messages"></div>
