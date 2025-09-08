@@ -1,3 +1,0 @@
-npx serve .
-
-filemerge tool
