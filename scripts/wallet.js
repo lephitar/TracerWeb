@@ -2,7 +2,7 @@ import { appState } from "../core/state.js";
 import { getTokenContract, getVestingContract } from "./contracts.js";
 import { CHAINS, CONTRACTS } from "./config.js";
 import { updateUI, showMessage, updateNetworkUI } from "./ui.js";
-import { initProvider } from "../core/provider.js";
+//import { initProvider } from "../core/provider.js";
 
 export function detectNetwork(chainId) {
   const networkId = parseInt(chainId);
