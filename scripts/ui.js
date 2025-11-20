@@ -163,7 +163,7 @@ export function updateUI() {
 export function updateNetworkUI() {
   if (appState.getState("wallet.network")) {
     document.getElementById("network").textContent =
-      appState.getState("wallet.network");
+      appState.getState("wallet.network").name;
     document.getElementById("tracerAddress").innerHTML = explorerLink(
       "address",
       appState.getState("tracer.address")
